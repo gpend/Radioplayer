@@ -1,0 +1,19 @@
+
+A simple python radio player
+
+Currently supports only FIP and FranceInter.
+
+Dependencies:
+
+- pynotify
+- python-mmkeys
+- python-dbus
+- gst-python
+
+Features:
+
+- notifications of song with libnotify
+- scrobbling to lastfm and/or librefm
+- optionally dump the stream to a local file
+- multimedia keys support (stop, playpause)
+- IM message status update (pidgin, gajim, telepathy)

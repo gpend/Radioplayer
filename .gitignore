@@ -1,0 +1,4 @@
+*.pyc
+*.bak
+*~
+radioplayer.egg-info/SOURCES.txt

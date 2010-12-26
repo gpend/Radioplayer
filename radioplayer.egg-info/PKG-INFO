@@ -1,0 +1,35 @@
+Metadata-Version: 1.0
+Name: radioplayer
+Version: 0.1
+Summary: A little radio player
+Home-page: http://base-art.net
+Author: Philippe Normand
+Author-email: phil@base-art.net
+License: GPL2
+Download-URL: http://base-art.net/static/radioplayer-0.1.tar.gz
+Description: 
+        A simple python radio player
+        
+        Currently supports only FIP and FranceInter.
+        
+        Dependencies:
+        
+        - pynotify
+        - python-mmkeys
+        - python-dbus
+        - gst-python
+        
+        Features:
+        
+        - notifications of song with libnotify
+        - scrobbling to lastfm and/or librefm
+        - optionally dump the stream to a local file
+        - multimedia keys support (stop, playpause)
+        - IM message status update (pidgin, gajim, telepathy)
+        
+Keywords: radio,multimedia,gstreamer,telepathy,d-bus,libre.fm,last.fm
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Console
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
