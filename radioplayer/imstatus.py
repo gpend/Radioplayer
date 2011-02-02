@@ -94,8 +94,11 @@ class GajimProxy(ImProxy):
         for account in accounts:
             account_infos = self._call_method("account_info", account)
             if account_infos["status"] != u'offline':
-                self._call_method("change_status", account_infos["status"],
-                                  message, account)
+                try:
+                    self._call_method("change_status", account_infos["status"],
+                                      message, account)
+                except Exception, exc:
+                    print exc
 
 
 class ImStatusManager:

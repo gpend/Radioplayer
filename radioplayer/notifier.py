@@ -2,8 +2,9 @@
 
 import time
 import urllib2
-
+import socket
 import gobject
+import glib
 import dbus
 from dbus.mainloop.glib import DBusGMainLoop
 DBusGMainLoop(set_as_default=True)
@@ -72,19 +73,25 @@ class Notifier:
         mbid = ""
         if self.lastfm:
             search_results = self.lastfm.search_for_track(artist_name, track_name)
-            page = search_results.get_next_page()
+            try:
+                page = search_results.get_next_page()
+            except:
+                page = []
             if len(page) > 0:
                 track = page[0]
-                track.scrobble(now)
-                artist_nice_name = track.artist.name
-                track_nice_name = track.title
-                album = track.get_album()
-                if album:
-                    album_title = album.title
-                else:
-                    album_title = ""
-                duration = int(track.get_duration() / 1000.)
-                mbid = track.get_mbid() or ""
+                try:
+                    track.scrobble(now)
+                    artist_nice_name = track.artist.name
+                    track_nice_name = track.title
+                    album = track.get_album()
+                    if album:
+                        album_title = album.title
+                    else:
+                        album_title = ""
+                    duration = int(track.get_duration() / 1000.)
+                    mbid = track.get_mbid() or ""
+                except socket.error:
+                    return
 
         if self.librefm:
             source = pylast.SCROBBLE_SOURCE_NON_PERSONALIZED_BROADCAST
@@ -92,8 +99,11 @@ class Notifier:
             scrobble_args = (artist_nice_name, track_nice_name,
                              now, source, mode, duration, album_title,)
             scrobble_kwargs = dict(mbid=mbid)
-            self.librefm.get_scrobbler("tst", "1.0").scrobble(*scrobble_args,
-                                                              **scrobble_kwargs)
+            try:
+                self.librefm.get_scrobbler("tst", "1.0").scrobble(*scrobble_args,
+                                                                  **scrobble_kwargs)
+            except (socket.error,pylast.ScrobblingError), error:
+                print error
 
     def stop(self):
         if self.player:
@@ -109,8 +119,11 @@ class Notifier:
         status = "♫ %s - %s ♫" % (name, title)
         self.notification.update(self.station_name, status)
         self.notification.props.icon_name = "media-playback-start-symbolic"
-        self.notification.show()
-        return u"%s: %s" % (self.station_name, status)
+        try:
+            self.notification.show()
+        except glib.GError, error:
+            print error
+        return "%s: %s" % (self.station_name, status)
 
     def update(self):
         try:
