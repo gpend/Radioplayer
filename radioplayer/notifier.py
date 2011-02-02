@@ -16,10 +16,11 @@ pynotify.init("Radio")
 
 class Notifier:
 
-    def __init__(self, interval, station, output, config):
+    def __init__(self, interval, station, audiosink, output, config):
         self.loop = gobject.MainLoop()
         self.interval = interval
         self.station_name = station
+        self.audiosink = audiosink
         self.output_path = output
         self.config = config
 
@@ -37,7 +38,8 @@ class Notifier:
 
     def start_player(self):
         if self.interval:
-            self.player = player.Player(self.station.live_url, self.output_path)
+            self.player = player.Player(self.station.live_url, self.audiosink,
+                                        self.output_path)
             self.player.start()
         else:
             self.player = None

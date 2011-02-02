@@ -7,18 +7,21 @@ import mmkeys
 
 class Player:
 
-    def __init__(self, url, output_location=None):
+    def __init__(self, url, audiosink="autoaudiosink", output_location=None):
         self.keys = mmkeys.MmKeys()
         self.keys.connect("mm-playpause", self.playpause_cb)
         self.keys.connect("mm-stop", self.stop)
         if not output_location:
             self.pipeline = gst.element_factory_make("playbin2")
             self.pipeline.props.uri = url
+            if autoaudiosink != "autoaudiosink":
+                self.pipeline.props.audio_sink = gst.element_factory_make(audiosink)
         else:
             self.pipeline = gst.parse_launch("souphttpsrc location=%s "
                                              "! tee name=t queue t. ! decodebin2 "
-                                             "! autoaudiosink t. ! queue "
+                                             "! %s t. ! queue "
                                              "! filesink location=%s" % (url,
+                                                                         audiosink,
                                                                          output_location))
         bus = self.pipeline.get_bus()
         bus.add_signal_watch()

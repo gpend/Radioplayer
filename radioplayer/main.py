@@ -15,6 +15,9 @@ def main(args=None):
     parser.add_option("-s", "--station",
                       dest="station", default="FIP",
                       help="Radio to tune to.")
+    parser.add_option("-a", "--audio-sink",
+                      dest="audiosink", default="autoaudiosink",
+                      help="audio sink to use")
 
     (options, args) = parser.parse_args(args)
 
@@ -28,5 +31,5 @@ def main(args=None):
         config.read(cfgfile)
 
     from radioplayer.notifier import Notifier
-    notifier = Notifier(options.interval, options.station, options.output, config)
+    notifier = Notifier(options.interval, options.station, options.audiosink, options.output, config)
     notifier.run()
