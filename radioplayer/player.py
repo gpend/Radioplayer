@@ -14,7 +14,7 @@ class Player:
         if not output_location:
             self.pipeline = gst.element_factory_make("playbin2")
             self.pipeline.props.uri = url
-            if autoaudiosink != "autoaudiosink":
+            if audiosink != "autoaudiosink":
                 self.pipeline.props.audio_sink = gst.element_factory_make(audiosink)
         else:
             self.pipeline = gst.parse_launch("souphttpsrc location=%s "
