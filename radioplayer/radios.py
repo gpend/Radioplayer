@@ -12,8 +12,6 @@ class FipRadio:
         artiste = encours.contents[0]
         name = artiste.contents[0].contents[0].strip().title()
         title = artiste.contents[1].replace('|', '').strip().title()
-        name = name.encode("iso8859-1")
-        title = title.encode("iso8859-1")
         return (name, title)
 
 class FranceInterRadio:
