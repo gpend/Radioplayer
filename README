@@ -6,7 +6,6 @@ Currently supports only FIP and FranceInter.
 Dependencies:
 
 - pynotify
-- python-mmkeys
 - python-dbus
 - gst-python
 
