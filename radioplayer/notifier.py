@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import sys
 import time
 import urllib2
+import httplib
 import socket
 import gobject
 import glib
@@ -94,6 +96,8 @@ class Notifier:
                     mbid = track.get_mbid() or ""
                 except socket.error:
                     return
+                except httplib.BadStatusLine:
+                    sys.exit(-1)
 
         if self.librefm:
             source = pylast.SCROBBLE_SOURCE_NON_PERSONALIZED_BROADCAST
