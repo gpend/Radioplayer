@@ -18,12 +18,13 @@ pynotify.init("Radio")
 
 class Notifier:
 
-    def __init__(self, interval, station, audiosink, output, config):
+    def __init__(self, interval, station, audiosink, output, noscrobble, config):
         self.loop = gobject.MainLoop()
         self.interval = interval
         self.station_name = station
         self.audiosink = audiosink
         self.output_path = output
+        self.disable_scrobble = noscrobble
         self.config = config
 
         self.station = radios.STATIONS[self.station_name]()
@@ -66,6 +67,8 @@ class Notifier:
                                                       password_hash=librefm_pw_hash)
 
     def scrobble_current(self, current_artist_song):
+        if self.disable_scrobble:
+            return
         if not current_artist_song:
             return
         artist_name, track_name = current_artist_song

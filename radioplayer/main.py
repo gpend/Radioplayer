@@ -18,6 +18,9 @@ def main(args=None):
     parser.add_option("-a", "--audio-sink",
                       dest="audiosink", default="autoaudiosink",
                       help="audio sink to use")
+    parser.add_option("-n", "--no-scrobble", action="store_true", default=False,
+                      dest="noscrobble",
+                      help="disable scrobbling")
 
     (options, args) = parser.parse_args(args)
 
@@ -31,5 +34,5 @@ def main(args=None):
         config.read(cfgfile)
 
     from radioplayer.notifier import Notifier
-    notifier = Notifier(options.interval, options.station, options.audiosink, options.output, config)
+    notifier = Notifier(options.interval, options.station, options.audiosink, options.output, options.noscrobble, config)
     notifier.run()
