@@ -6,10 +6,12 @@ import dbus
 
 class Player:
 
-    def __init__(self, url, audiosink="autoaudiosink", output_location=None):
-        bus = dbus.SessionBus()
-
+    def __init__(self, url, audiosink="autoaudiosink", output_location=None,
+                 paused_or_stopped_cb=None):
+        self._paused_or_stopped_cb = paused_or_stopped_cb
         self._app_name = "radioplayer"
+
+        bus = dbus.SessionBus()
         remote_object = bus.get_object("org.gnome.SettingsDaemon", "/org/gnome/SettingsDaemon/MediaKeys")
         self.proxy = dbus.Interface(remote_object, "org.gnome.SettingsDaemon.MediaKeys")
 
@@ -57,13 +59,18 @@ class Player:
     def start(self):
         self.pipeline.set_state(gst.STATE_PLAYING)
 
-    def stop(self, *args):
+    def stop(self, *args, **kwargs):
+        notify = kwargs.get("notify", True)
         self.pipeline.set_state(gst.STATE_NULL)
+        if notify and self._paused_or_stopped_cb:
+            self._paused_or_stopped_cb()
 
     def toggle_play(self):
         result, state, pending = self.pipeline.get_state()
         if state == gst.STATE_PLAYING:
             new_state = gst.STATE_PAUSED
+            if self._paused_or_stopped_cb:
+                self._paused_or_stopped_cb()
         else:
             new_state = gst.STATE_PLAYING
         self.pipeline.set_state(new_state)
