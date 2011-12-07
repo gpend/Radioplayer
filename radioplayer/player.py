@@ -8,6 +8,13 @@ class Player:
 
     def __init__(self, url, audiosink="autoaudiosink", output_location=None):
         bus = dbus.SessionBus()
+
+        self._app_name = "radioplayer"
+        remote_object = bus.get_object("org.gnome.SettingsDaemon", "/org/gnome/SettingsDaemon/MediaKeys")
+        self.proxy = dbus.Interface(remote_object, "org.gnome.SettingsDaemon.MediaKeys")
+
+        self.proxy.GrabMediaPlayerKeys(self._app_name, 0)
+
         bus.add_signal_receiver(self._key_pressed, signal_name="MediaPlayerKeyPressed",
                                 dbus_interface="org.gnome.SettingsDaemon.MediaKeys")
         if not output_location:
@@ -36,11 +43,16 @@ class Player:
             self.stop()
             self.start()
 
-    def _key_pressed(self, foo, key):
+    def _key_pressed(self, app, key):
+        if app != self._app_name:
+            return
         if key == dbus.String(u"Play"):
             self.toggle_play()
         elif key == dbus.String(u"Stop"):
             self.stop()
+
+    def ping_gnome(self):
+        self.proxy.GrabMediaPlayerKeys(self._app_name, 0)
 
     def start(self):
         self.pipeline.set_state(gst.STATE_PLAYING)

@@ -148,6 +148,7 @@ class Notifier:
             print message
             self.im_manager.set_status_async(message)
             self.scrobble_current(current)
+            self.player.ping_gnome()
         self.current_artist_song = current
         return True
 
