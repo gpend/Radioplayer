@@ -112,6 +112,7 @@ class Notifier:
                 print error
 
     def stop(self):
+        self.notification.close()
         if self.player:
             self.player.stop()
         self.im_manager.restore_status()
@@ -158,6 +159,4 @@ class Notifier:
         try:
             self.loop.run()
         except KeyboardInterrupt:
-            self.notification.close()
-            if self.player:
-                self.player.stop()
+            self.stop()
