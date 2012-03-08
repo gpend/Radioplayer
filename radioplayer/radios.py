@@ -21,4 +21,10 @@ class FranceInterRadio:
         # TODO
         return ("", "")
 
-STATIONS={"FIP": FipRadio, "FranceInter": FranceInterRadio}
+class LeMouvRadio:
+    live_url = "http://mp3.live.tv-radio.com/lemouv/all/lemouvhautdebit.mp3"
+
+    def artist_song(self):
+        return ("", "")
+
+STATIONS={"FIP": FipRadio, "FranceInter": FranceInterRadio, "LeMouv": LeMouvRadio}
