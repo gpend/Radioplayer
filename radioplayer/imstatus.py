@@ -109,7 +109,7 @@ class ImStatusManager:
             try:
                 proxy = klass(self._bus)
             except UnknownServiceException, exc:
-                print "Error creating proxy: %r" % exc
+                print "Unknown d-bus service: %s" % service_name
                 continue
             self.im_proxies[service_name] = proxy
 
