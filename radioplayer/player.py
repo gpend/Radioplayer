@@ -73,7 +73,7 @@ class Player:
             self._paused_or_stopped_cb()
 
     def toggle_play(self):
-        result, state, pending = self.pipeline.get_state()
+        result, state, pending = self.pipeline.get_state(0)
         if state == Gst.State.PLAYING:
             new_state = Gst.State.PAUSED
             if self._paused_or_stopped_cb:
