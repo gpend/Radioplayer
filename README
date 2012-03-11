@@ -1,13 +1,14 @@
 
 A simple python radio player
 
-Currently supports only FIP and FranceInter.
+Currently supports only FIP, LeMouv and FranceInter.
 
 Dependencies:
 
-- pynotify
-- python-dbus
-- gst-python
+- python-gi
+- gstreamer
+- gst-plugins-base
+- gst-plugins-good
 
 Features:
 
