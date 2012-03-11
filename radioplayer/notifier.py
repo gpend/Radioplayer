@@ -162,10 +162,8 @@ class Notifier:
         return True
 
     def run(self):
-        self.update()
         if self.interval:
-            self.timeout_id = GLib.timeout_add_seconds(self.interval,
-                                                          self.update)
+            self.timeout_id = GLib.timeout_add_seconds(self.interval, self.update)
         try:
             self.loop.run()
         except KeyboardInterrupt:
