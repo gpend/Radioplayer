@@ -1,21 +1,12 @@
 
-import gobject
-import dbus
-import dbus.exceptions
+from gi.repository import GLib, Gio
+from gi._glib import GError
 
 class DBusException(Exception):
     pass
 
 class UnknownServiceException(DBusException):
     pass
-
-def exception_from_dbus_exception(exc):
-    mapping = {"org.freedesktop.DBus.Error.ServiceUnknown": UnknownServiceException}
-    try:
-        return mapping[exc._dbus_error_name](*exc.args)
-    except KeyError:
-        print "Unknown exception: %r" % exc._dbus_error_name
-        return exc
 
 class ImProxy:
     saved_status = ""
@@ -24,17 +15,14 @@ class ImProxy:
     interface_name = ""
 
     def __init__(self, bus):
-        try:
-            remote_object = bus.get_object(self.service_name, self.object_path)
-        except dbus.exceptions.DBusException, exc:
-            raise exception_from_dbus_exception(exc)
+        self.remote_object = Gio.DBusProxy.new_sync(bus, 0, None, self.service_name, self.object_path, self.interface_name, None)
+        if not self.remote_object.get_name_owner():
+            raise UnknownServiceException()
 
-        self.interface = dbus.Interface(remote_object, self.interface_name)
-
-    def _call_method(self, name, *args):
-        func = getattr(self.interface, name)
-        result = func(*args)
-        return result
+    def _call_method(self, name, signature, *args):
+        # TODO: somehow get method signature from introspection data.
+        variant_args = GLib.Variant(signature, args)
+        return self.remote_object.call_sync(name, variant_args, 0, -1, None)
 
     def save_status(self):
         self.saved_status = self.get_status()
@@ -55,16 +43,16 @@ class PidginProxy(ImProxy):
     interface_name = "im.pidgin.purple.PurpleInterface"
 
     def _get_current(self):
-        return self._call_method("PurpleSavedstatusGetCurrent")
+        return self._call_method("PurpleSavedstatusGetCurrent", "()")
 
     def get_status(self):
-        return self._call_method("PurpleSavedstatusGetMessage",
+        return self._call_method("PurpleSavedstatusGetMessage", "(s)",
                                  self._get_current())
 
     def set_status(self, message):
         current = self._get_current()
-        self._call_method("PurpleSavedstatusSetMessage", current, message)
-        self._call_method("PurpleSavedstatusActivate", current)
+        self._call_method("PurpleSavedstatusSetMessage", "(ss)", current, message)
+        self._call_method("PurpleSavedstatusActivate", "(s)", current)
 
 class TelepathyProxy(ImProxy):
     service_name = "org.freedesktop.Telepathy.MissionControl"
@@ -72,14 +60,11 @@ class TelepathyProxy(ImProxy):
     interface_name = "org.freedesktop.Telepathy.MissionControl"
 
     def get_status(self):
-        return self._call_method("GetPresenceMessage")
+        return self._call_method("GetPresenceMessage", "()")
 
     def set_status(self, message):
-        try:
-            presence = self._call_method("GetPresence")
-        except dbus.exceptions.DBusException, exc:
-            raise exception_from_dbus_exception(exc)
-        self._call_method("SetPresence", presence, message)
+        presence = self._call_method("GetPresence", "()")
+        self._call_method("SetPresence", "(ss)", presence, message)
 
 class GajimProxy(ImProxy):
     service_name = "org.gajim.dbus"
@@ -87,23 +72,25 @@ class GajimProxy(ImProxy):
     interface_name = "org.gajim.dbus.RemoteInterface"
 
     def get_status(self):
-        return self._call_method("get_status_message", "")
+        val = self._call_method("get_status_message", "(s)", "").get_child_value(0)
+        return val.dup_string()[0]
 
     def set_status(self, message):
-        accounts = self._call_method("list_accounts")
+        accounts = self._call_method("list_accounts", "()").get_child_value(0)
         for account in accounts:
-            account_infos = self._call_method("account_info", account)
+            account_infos = self._call_method("account_info", "(s)", account).get_child_value(0)
             if account_infos["status"] != u'offline':
                 try:
-                    self._call_method("change_status", account_infos["status"],
+                    self._call_method("change_status", "(sss)", account_infos["status"],
                                       message, account)
                 except Exception, exc:
                     print exc
 
 
 class ImStatusManager:
+    ProxyTypes = [PidginProxy, TelepathyProxy, GajimProxy]
     im_proxy_classes = dict([(p.service_name, p) for p in
-                             [PidginProxy, TelepathyProxy, GajimProxy]])
+                             ProxyTypes])
 
     def __init__(self, bus):
         self._timeout = None
@@ -112,8 +99,10 @@ class ImStatusManager:
 
         self._load_all_proxies()
 
-        dbus_obj = self._bus.get_object('org.freedesktop.DBus', '/org/freedesktop/DBus')
-        dbus_obj.connect_to_signal('NameOwnerChanged', self._name_owner_changed_cb)
+        for t in self.ProxyTypes:
+            Gio.bus_watch_name(Gio.BusType.SESSION, t.service_name,
+                               Gio.BusNameWatcherFlags.NONE, self._on_name_appeared, self._on_name_vanished)
+
 
     def _load_all_proxies(self):
         for service_name, klass in self.im_proxy_classes.iteritems():
@@ -124,29 +113,25 @@ class ImStatusManager:
                 continue
             self.im_proxies[service_name] = proxy
 
-    def _name_owner_changed_cb(self, service, old, new):
-        if old:
-            # service disappeared
-            if service in self.im_proxies:
-                del self.im_proxies[service]
-        else:
-            # service appeared
-            klass = self.im_proxy_classes.get(service)
-            if klass:
-                proxy = klass(self._bus)
-                proxy.save_status()
-                self.im_proxies[service] = proxy
+    def _on_name_appeared(self, connection, service, *data):
+        klass = self.im_proxy_classes.get(service)
+        if klass:
+            proxy = klass(self._bus)
+            proxy.save_status()
+            self.im_proxies[service] = proxy
+
+    def _on_name_vanished(self, connection, service, *data):
+        if service in self.im_proxies:
+            del self.im_proxies[service]
 
     def _call_proxy_method(self, name, *args):
+        results = []
         for proxy in self.im_proxies.values():
-            try:
-                getattr(proxy, name)(*args)
-            except Exception, exc:
-                print "Error while calling method %r on %r: %r" % (name, proxy,
-                                                                   proxy.interface_name)
+            results.append(getattr(proxy, name)(*args))
+        return results
 
     def save_status(self):
-        self._call_proxy_method("save_status")
+        return self._call_proxy_method("save_status")
 
     def restore_status(self):
         self._call_proxy_method("restore_status")
@@ -155,12 +140,12 @@ class ImStatusManager:
         self._call_proxy_method("set_status", message)
 
     def get_status(self):
-        self._call_proxy_method("get_status")
+        return self._call_proxy_method("get_status")
 
     def set_status_async(self, message):
         if self._timeout:
-            gobject.source_remove(self._timeout)
-        self._timeout = gobject.timeout_add(0, self._set_status_now,
+            GLib.source_remove(self._timeout)
+        self._timeout = GLib.timeout_add(0, self._set_status_now,
                                             message)
     def _set_status_now(self, message):
         self.set_status(message)
@@ -171,7 +156,7 @@ if __name__ == "__main__":
     import sys
 
     message = sys.argv[-1]
-    bus = dbus.SessionBus()
+    bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
     manager = ImStatusManager(bus)
     print "saved state: ", manager.save_status()
     print "current: ", manager.get_status()
