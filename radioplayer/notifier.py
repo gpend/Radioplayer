@@ -22,7 +22,7 @@ class Notifier:
 
         self.suspended = False
 
-        self.station = radios.STATIONS[self.station_name]()
+        self.station = radios.STATIONS[self.station_name](self)
         self.current_artist_song = None
         self.notification = desktop_notify.Notification("RadioPlayer", self.closed_cb)
 
