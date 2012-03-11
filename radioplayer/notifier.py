@@ -5,21 +5,14 @@ import time
 import urllib2
 import httplib
 import socket
-import gobject
-import glib
-import dbus
-from dbus.mainloop.glib import DBusGMainLoop
-DBusGMainLoop(set_as_default=True)
+from gi.repository import GLib, Gio
 
-from radioplayer import player, radios, pylast, imstatus
-
-import pynotify
-pynotify.init("Radio")
+from radioplayer import player, radios, pylast, imstatus, desktop_notify
 
 class Notifier:
 
     def __init__(self, interval, station, audiosink, output, noscrobble, config):
-        self.loop = gobject.MainLoop()
+        self.loop = GLib.MainLoop()
         self.interval = interval
         self.station_name = station
         self.audiosink = audiosink
@@ -31,14 +24,12 @@ class Notifier:
 
         self.station = radios.STATIONS[self.station_name]()
         self.current_artist_song = None
-        self.notification = pynotify.Notification(self.station_name, "foo")
-        self.notification.set_timeout(pynotify.EXPIRES_DEFAULT)
-        self.notification.connect("closed", self.closed_cb)
+        self.notification = desktop_notify.Notification("RadioPlayer", self.closed_cb)
 
         self.login()
         self.start_player()
 
-        self.bus = dbus.SessionBus()
+        self.bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
         self.im_manager = imstatus.ImStatusManager(self.bus)
         self.im_manager.save_status()
 
@@ -46,7 +37,7 @@ class Notifier:
         self.suspended = True
         self.notification.clear_actions()
         self.notification.add_action("resume", "Resume playback", self._default_action_cb)
-        self.notification.props.icon_name = "media-playback-stop-symbolic"
+        self.notification.icon_name = "media-playback-stop-symbolic"
         self.notification.show()
 
     def _default_action_cb(self, notification, action):
@@ -137,7 +128,7 @@ class Notifier:
     def closed_cb(self, reason):
         if self.suspended:
             self.notification.clear_actions()
-            self.notification.props.icon_name = "media-playback-start-symbolic"
+            self.notification.icon_name = "media-playback-start-symbolic"
             self.suspended = False
             self.notification.show()
         elif not self.interval:
@@ -146,11 +137,8 @@ class Notifier:
     def status(self, name, title):
         status = "♫ %s - %s ♫" % (name, title)
         self.notification.update(self.station_name, status)
-        self.notification.props.icon_name = "media-playback-start-symbolic"
-        try:
-            self.notification.show()
-        except glib.GError, error:
-            print error
+        self.notification.icon_name = "media-playback-start-symbolic"
+        self.notification.show()
         return "%s: %s" % (self.station_name, status)
 
     def update(self):
@@ -176,7 +164,7 @@ class Notifier:
     def run(self):
         self.update()
         if self.interval:
-            self.timeout_id = gobject.timeout_add_seconds(self.interval,
+            self.timeout_id = GLib.timeout_add_seconds(self.interval,
                                                           self.update)
         try:
             self.loop.run()
