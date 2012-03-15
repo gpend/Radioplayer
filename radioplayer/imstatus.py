@@ -72,7 +72,10 @@ class GajimProxy(ImProxy):
     interface_name = "org.gajim.dbus.RemoteInterface"
 
     def get_status(self):
-        val = self._call_method("get_status_message", "(s)", "").get_child_value(0)
+        try:
+            val = self._call_method("get_status_message", "(s)", "").get_child_value(0)
+        except:
+            return ""
         return val.dup_string()[0]
 
     def set_status(self, message):
