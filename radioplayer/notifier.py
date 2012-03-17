@@ -135,7 +135,7 @@ class Notifier:
             self.notification.close()
 
     def status(self, name, title):
-        status = "♫ %s - %s ♫" % (name, title)
+        status = u"♫ %s - %s ♫" % (name, title)
         self.notification.update(self.station_name, status)
         self.notification.icon_name = "media-playback-start-symbolic"
         self.notification.show()
@@ -162,6 +162,7 @@ class Notifier:
         return True
 
     def run(self):
+        self.update()
         if self.interval:
             self.timeout_id = GLib.timeout_add_seconds(self.interval, self.update)
         try:
