@@ -52,6 +52,8 @@ class Notifier:
             self.player = None
 
     def login(self):
+        if self.disable_scrobble:
+            return
         if not self.interval:
             self.lastfm = self.librefm = None
             return
