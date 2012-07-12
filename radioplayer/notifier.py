@@ -78,7 +78,7 @@ class Notifier:
         if not current_artist_song:
             return
         artist_name, track_name = current_artist_song
-        now = time.time()
+        now = int(time.time())
         artist_nice_name = artist_name
         track_nice_name = track_name
         album_title = ""
@@ -86,27 +86,31 @@ class Notifier:
         mbid = ""
         if self.lastfm:
             search_results = self.lastfm.search_for_track(artist_name, track_name)
-            try:
-                page = search_results.get_next_page()
-            except:
-                page = []
+            page = search_results.get_next_page()
             if len(page) > 0:
                 track = page[0]
+                album = track.get_album()
+                if album:
+                    album_title = album.title
+                else:
+                    album_title = ""
+                duration = int(track.get_duration() / 1000.)
+                mbid = track.get_mbid() or ""
                 try:
-                    track.scrobble(now)
-                    artist_nice_name = track.artist.name
-                    track_nice_name = track.title
-                    album = track.get_album()
-                    if album:
-                        album_title = album.title
-                    else:
-                        album_title = ""
-                    duration = int(track.get_duration() / 1000.)
-                    mbid = track.get_mbid() or ""
+                    self.lastfm.scrobble(track.artist.name, track.title, now, album_title, album_artist=None, track_number=None, duration=duration, stream_id=None, context=None, mbid=mbid)
                 except socket.error:
                     return
                 except httplib.BadStatusLine:
                     sys.exit(-1)
+                except pylast.WSError:
+                    try:
+                        self.lastfm.scrobble(track.artist.name, track.title, now, album_title, album_artist=None, track_number=None, duration=duration, stream_id=None, context=None, mbid=mbid)
+                    except pylast.WSError:
+                        # give up
+                        pass
+                artist_nice_name = track.artist.name
+                track_nice_name = track.title
+
 
         if self.librefm:
             source = pylast.SCROBBLE_SOURCE_NON_PERSONALIZED_BROADCAST
