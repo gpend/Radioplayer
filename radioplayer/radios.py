@@ -30,4 +30,11 @@ class FranceInterRadio(Radio):
 class LeMouvRadio(Radio):
     live_url = "http://mp3.live.tv-radio.com/lemouv/all/lemouvhautdebit.mp3"
 
-STATIONS={"FIP": FipRadio, "FranceInter": FranceInterRadio, "LeMouv": LeMouvRadio}
+class KcsmRadio(Radio):
+    live_url = "http://sc1.abacast.com:8240"
+
+STATIONS={"FIP": FipRadio,
+          "FranceInter": FranceInterRadio,
+          "LeMouv": LeMouvRadio,
+          "Kscm": KcsmRadio,
+          }
