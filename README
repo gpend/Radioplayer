@@ -1,7 +1,7 @@
 
-A simple python radio player
+A simple radio player implemented in Python.
 
-Currently supports only FIP, LeMouv and FranceInter.
+Currently supports FIP, LeMouv, FranceInter and KCSM.
 
 Dependencies:
 
