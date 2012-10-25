@@ -33,8 +33,19 @@ class LeMouvRadio(Radio):
 class KcsmRadio(Radio):
     live_url = "http://sc1.abacast.com:8240"
 
+    def artist_song(self):
+        url = 'http://kcsm.org/playlist'
+        soup = BeautifulSoup.BeautifulSoup(urllib2.urlopen(url).read())
+        tr = soup('table', {'class': 'style54'})[1].tr('td')
+
+        time = tr[1].div.string
+        artist = tr[3].string.title()
+        title = tr[4].span.string.title()
+        album = tr[5].span.string.title()
+        return (artist, title)
+
 STATIONS={"FIP": FipRadio,
           "FranceInter": FranceInterRadio,
           "LeMouv": LeMouvRadio,
-          "Kscm": KcsmRadio,
+          "KCSM": KcsmRadio,
           }
