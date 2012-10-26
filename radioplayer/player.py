@@ -31,7 +31,7 @@ class Player:
                 self.pipeline.props.audio_sink = Gst.ElementFactory.make(audiosink, "audiosink")
         else:
             self.pipeline = Gst.parse_launch("souphttpsrc location=%s "
-                                             "! tee name=t queue t. ! decodebin2 "
+                                             "! tee name=t queue t. ! decodebin "
                                              "! %s t. ! queue "
                                              "! filesink location=%s" % (url,
                                                                          audiosink,
