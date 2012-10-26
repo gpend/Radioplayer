@@ -1,4 +1,5 @@
-
+import gi
+gi.require_version('Gst', '1.0')
 from gi.repository import Gst, Gio, GLib
 
 class Player:
@@ -24,7 +25,7 @@ class Player:
         self.proxy.connect("g-signal", on_signal)
 
         if not output_location:
-            self.pipeline = Gst.ElementFactory.make("playbin2", "playbin")
+            self.pipeline = Gst.ElementFactory.make("playbin", "playbin")
             self.pipeline.props.uri = url
             if audiosink != "autoaudiosink":
                 self.pipeline.props.audio_sink = Gst.ElementFactory.make(audiosink, "audiosink")
