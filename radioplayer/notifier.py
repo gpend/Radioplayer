@@ -103,11 +103,8 @@ class Notifier:
                 except httplib.BadStatusLine:
                     sys.exit(-1)
                 except pylast.WSError:
-                    try:
-                        self.lastfm.scrobble(track.artist.name, track.title, now, album_title, album_artist=None, track_number=None, duration=duration, stream_id=None, context=None, mbid=mbid)
-                    except pylast.WSError:
-                        # give up
-                        pass
+                    # FIXME: Deal properly with this one...
+                    pass
                 artist_nice_name = track.artist.name
                 track_nice_name = track.title
 
