@@ -7,13 +7,13 @@ class Radio(object):
     def __init__(self, notifier):
         self.notifier = notifier
 
-    def artist_song(self):
-        return ("", "")
+    def now_playing(self):
+        return ("", "", "")
 
 class FipRadio(Radio):
     live_url = "http://mp3.live.tv-radio.com/fip/all/fiphautdebit.mp3"
 
-    def artist_song(self):
+    def now_playing(self):
         now = int(round(time.time() * 1000))
         url =  "http://fipradio.fr/sites/default/files/direct-large.json?_=%s" % now
         data = urllib2.urlopen(url).read()
@@ -22,7 +22,7 @@ class FipRadio(Radio):
         div =  soup.findAll("div", attrs={"class":"direct-item direct-distance-0 current"})[0]
         artist = div.findAll("div", attrs={"class": "artiste"})[0].text
         title = div.findAll("div", attrs={"class": "titre"})[0].text
-        return (artist, title)
+        return (artist, "", title)
 
 class FranceInterRadio(Radio):
     live_url = "http://mp3.live.tv-radio.com/franceinter/all/franceinterhautdebit.mp3"
@@ -33,7 +33,7 @@ class LeMouvRadio(Radio):
 class KcsmRadio(Radio):
     live_url = "http://sc1.abacast.com:8240"
 
-    def artist_song(self):
+    def now_playing(self):
         url = 'http://kcsm.org/playlist'
         soup = BeautifulSoup.BeautifulSoup(urllib2.urlopen(url).read())
         tr = soup('table', {'class': 'style54'})[1].tr('td')
@@ -42,7 +42,7 @@ class KcsmRadio(Radio):
         artist = tr[3].string.title()
         title = tr[4].span.string.title()
         album = tr[5].span.string.title()
-        return (artist, title)
+        return (artist, album, title)
 
 STATIONS={"FIP": FipRadio,
           "FranceInter": FranceInterRadio,

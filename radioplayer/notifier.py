@@ -23,7 +23,7 @@ class Notifier:
         self.suspended = False
 
         self.station = radios.STATIONS[self.station_name](self)
-        self.current_artist_song = None
+        self.current_status = None
         self.notification = desktop_notify.Notification("RadioPlayer", self.closed_cb)
 
         self.login()
@@ -72,16 +72,15 @@ class Notifier:
             self.librefm = pylast.get_librefm_network(username=librefm_username,
                                                       password_hash=librefm_pw_hash)
 
-    def scrobble_current(self, current_artist_song):
+    def scrobble_current(self, current_status):
         if self.disable_scrobble:
             return
-        if not current_artist_song:
+        if not current_status:
             return
-        artist_name, track_name = current_artist_song
+        artist_name, album_title, track_name = current_status
         now = int(time.time())
         artist_nice_name = artist_name
         track_nice_name = track_name
-        album_title = ""
         duration = 0
         mbid = ""
         if self.lastfm:
@@ -89,11 +88,10 @@ class Notifier:
             page = search_results.get_next_page()
             if len(page) > 0:
                 track = page[0]
-                album = track.get_album()
-                if album:
-                    album_title = album.title
-                else:
-                    album_title = ""
+                if not album_title:
+                    album = track.get_album()
+                    if album:
+                        album_title = album.title
                 duration = int(track.get_duration() / 1000.)
                 mbid = track.get_mbid() or ""
                 try:
@@ -137,7 +135,7 @@ class Notifier:
         elif not self.interval:
             self.notification.close()
 
-    def status(self, name, title):
+    def status(self, name, album, title):
         status = u"♫ %s - %s ♫" % (name, title)
         self.notification.update(self.station_name, status)
         self.notification.icon_name = "media-playback-start-symbolic"
@@ -146,7 +144,7 @@ class Notifier:
 
     def update(self):
         try:
-            current = self.station.artist_song()
+            current = self.station.now_playing()
         except urllib2.URLError, exc:
             print str(exc)
             return True
@@ -154,14 +152,14 @@ class Notifier:
             print exc
             return True
 
-        if "" not in current and (not self.current_artist_song or \
-                                  (current != self.current_artist_song)):
+        if "" not in (current[0], current[2]) and (not self.current_status or \
+                                  (current != self.current_status)):
             message = self.status(*current)
             print message
             self.im_manager.set_status_async(message)
             self.scrobble_current(current)
             self.player.ping_gnome()
-        self.current_artist_song = current
+        self.current_status = current
         return True
 
     def run(self):
