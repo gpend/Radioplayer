@@ -2,6 +2,8 @@ import optparse
 import os, sys
 import ConfigParser
 
+from gi.repository import GLib
+
 def main(args=None):
     if not args:
         args = sys.argv[1:]
@@ -32,6 +34,10 @@ def main(args=None):
     config = ConfigParser.RawConfigParser()
     if os.path.exists(cfgfile):
         config.read(cfgfile)
+
+    GLib.set_prgname("RadioPlayer")
+    GLib.setenv("PA_PROP_MEDIA_ROLE", "music", True)
+    GLib.setenv("PA_PROP_MEDIA_ICON_NAME", "audio-x-mp3", True)
 
     from radioplayer.notifier import Notifier
     notifier = Notifier(options.interval, options.station, options.audiosink, options.output, options.noscrobble, config)

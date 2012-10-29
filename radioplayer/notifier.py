@@ -140,6 +140,8 @@ class Notifier:
         self.notification.update(self.station_name, status)
         self.notification.icon_name = "media-playback-start-symbolic"
         self.notification.show()
+        GLib.setenv("PA_PROP_MEDIA_ARTIST", name, True)
+        GLib.setenv("PA_PROP_MEDIA_TITLE", title, True)
         return "%s: %s" % (self.station_name, status)
 
     def update(self):
