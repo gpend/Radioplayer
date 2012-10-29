@@ -157,7 +157,21 @@ class Notifier:
             message = self.status(*current)
             print message
             self.im_manager.set_status_async(message)
-            self.scrobble_current(current)
+            try:
+                self.scrobble_current(current)
+            except Exception, exc:
+                # Something went wrong, try 2 more times and die.
+                attempts = 2
+                while attemtps > 0:
+                    try:
+                        self.scrobble_current(current)
+                    except Exception, exc:
+                        attempts -= 1
+                        continue
+                    else:
+                        break
+                if not attempts:
+                    print "Scrobble failed..."
             self.player.ping_gnome()
         self.current_status = current
         return True
