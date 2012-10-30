@@ -37,8 +37,16 @@ class Player:
         if not output_location:
             self.pipeline = Gst.ElementFactory.make(PLAYBIN, "playbin")
             self.pipeline.props.uri = url
-            if audiosink != "autoaudiosink":
-                self.pipeline.props.audio_sink = Gst.ElementFactory.make(audiosink, "audiosink")
+            self.sinkbin = Gst.ElementFactory.make("bin", "audiobin")
+            level = Gst.ElementFactory.make("level", "audiolevel")
+            level.props.interval = 5000000000
+            sink = Gst.ElementFactory.make(audiosink, "audiosink")
+            self.sinkbin.add(level)
+            self.sinkbin.add(sink)
+            level.link(sink)
+            sinkpad = level.get_static_pad("sink")
+            self.sinkbin.add_pad(Gst.GhostPad.new("sink", sinkpad))
+            self.pipeline.props.audio_sink = self.sinkbin
         else:
             self.pipeline = Gst.parse_launch("souphttpsrc location=%s "
                                              "! tee name=t queue t. ! %s "
@@ -61,6 +69,15 @@ class Player:
             print "Restarting..."
             self.stop()
             self.start()
+        elif t == Gst.MessageType.ELEMENT:
+            structure = message.get_structure()
+            if structure.get_name() == "level" and structure.get_value("peak")[0] < -30:
+                # for value_type in ("peak", "rms", "decay"):
+                #     values = [ pow(10, val / 20) for val in structure.get_value(value_type)]
+                #     print "%6s -> %r" % (value_type, values)
+                    print "Silence detected, restarting playback"
+                    self.stop(notify=False)
+                    self.start()
 
     def _key_pressed(self, app, key):
         if app != self._app_name:
