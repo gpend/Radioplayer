@@ -55,16 +55,30 @@ class PidginProxy(ImProxy):
         self._call_method("PurpleSavedstatusActivate", "(s)", current)
 
 class TelepathyProxy(ImProxy):
-    service_name = "org.freedesktop.Telepathy.MissionControl"
-    object_path = "/org/freedesktop/Telepathy/MissionControl"
-    interface_name = "org.freedesktop.Telepathy.MissionControl"
+    service_name = "org.freedesktop.Telepathy.MissionControl5"
+    object_path = "/org/freedesktop/Telepathy/AccountManager"
+    interface_name = "org.freedesktop.DBus.Properties"
+    am_iface_name = "org.freedesktop.Telepathy.AccountManager"
+    account_iface_name = "org.freedesktop.Telepathy.Account"
 
     def get_status(self):
-        return self._call_method("GetPresenceMessage", "()")
+        for acct_obj_path in self.remote_object.Get("(ss)", self.am_iface_name, 'ValidAccounts'):
+            acct_proxy = Gio.DBusProxy.new_for_bus_sync(Gio.BusType.SESSION, 0, None,
+                                                        self.service_name, acct_obj_path,
+                                                        self.interface_name, None)
+            ret = acct_proxy.Get("(ss)", self.account_iface_name, "RequestedPresence")
+            if ret[2] != "":
+                return ret[2]
+        return ""
 
     def set_status(self, message):
-        presence = self._call_method("GetPresence", "()")
-        self._call_method("SetPresence", "(ss)", presence, message)
+        for acct_obj_path in self.remote_object.Get("(ss)", self.am_iface_name, 'ValidAccounts'):
+            acct_proxy = Gio.DBusProxy.new_for_bus_sync(Gio.BusType.SESSION, 0, None,
+                                                        self.service_name, acct_obj_path,
+                                                        self.interface_name, None)
+            status = acct_proxy.Get("(ss)", self.account_iface_name, "RequestedPresence")
+            vstatus = GLib.Variant("(uss)", (status[0], status[1], message))
+            acct_proxy.Set("(ssv)", self.account_iface_name, "RequestedPresence", vstatus)
 
 class GajimProxy(ImProxy):
     service_name = "org.gajim.dbus"
