@@ -1,5 +1,15 @@
 import gi
-gi.require_version('Gst', '1.0')
+
+try:
+    gi.require_version('Gst', '1.0')
+except:
+    gi.require_version('Gst', '0.10')
+    PLAYBIN = "playbin2"
+    DECODEBIN = "decodebin2"
+else:
+    PLAYBIN = "playbin"
+    DECODEBIN = "decodebin"
+
 from gi.repository import Gst, Gio, GLib
 
 class Player:
@@ -25,15 +35,15 @@ class Player:
         self.proxy.connect("g-signal", on_signal)
 
         if not output_location:
-            self.pipeline = Gst.ElementFactory.make("playbin", "playbin")
+            self.pipeline = Gst.ElementFactory.make(PLAYBIN, "playbin")
             self.pipeline.props.uri = url
             if audiosink != "autoaudiosink":
                 self.pipeline.props.audio_sink = Gst.ElementFactory.make(audiosink, "audiosink")
         else:
             self.pipeline = Gst.parse_launch("souphttpsrc location=%s "
-                                             "! tee name=t queue t. ! decodebin "
+                                             "! tee name=t queue t. ! %s "
                                              "! %s t. ! queue "
-                                             "! filesink location=%s" % (url,
+                                             "! filesink location=%s" % (url, DECODEBIN,
                                                                          audiosink,
                                                                          output_location))
         bus = self.pipeline.get_bus()
