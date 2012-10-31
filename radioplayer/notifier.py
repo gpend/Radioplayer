@@ -164,7 +164,7 @@ class Notifier:
             except Exception, exc:
                 # Something went wrong, try 2 more times and die.
                 attempts = 2
-                while attemtps > 0:
+                while attempts > 0:
                     try:
                         self.scrobble_current(current)
                     except Exception, exc:
