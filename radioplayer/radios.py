@@ -21,8 +21,9 @@ class FipRadio(Radio):
         soup = BeautifulSoup.BeautifulSoup(json_data["html"])
         div =  soup.findAll("div", attrs={"class":"direct-item direct-distance-0 current"})[0]
         artist = div.findAll("div", attrs={"class": "artiste"})[0].text
+        album = div.findAll("div", attrs={"class": "album"})[0].text
         title = div.findAll("div", attrs={"class": "titre"})[0].text
-        return (artist, "", title)
+        return (artist, album, title)
 
 class FranceInterRadio(Radio):
     live_url = "http://mp3.live.tv-radio.com/franceinter/all/franceinterhautdebit.mp3"
