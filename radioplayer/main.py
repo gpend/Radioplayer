@@ -23,8 +23,18 @@ def main(args=None):
     parser.add_option("-n", "--no-scrobble", action="store_true", default=False,
                       dest="noscrobble",
                       help="disable scrobbling")
+    parser.add_option("-l", "--list-stations", action="store_true", default=False,
+                      dest="list_stations",
+                      help="display the list of radio stations")
 
     (options, args) = parser.parse_args(args)
+
+    if options.list_stations:
+        from radioplayer.radios import STATIONS
+        print "Supported radio stations:"
+        for name in STATIONS.keys():
+            print "- %s" % name
+        return 0
 
     if args:
         cfgfile = args[0]

@@ -2,7 +2,16 @@ import urllib2, BeautifulSoup
 import json
 import time
 
+STATIONS={}
+
+class MetaRadio(type):
+    def __init__(cls, name, bases, dct):
+        super(MetaRadio, cls).__init__(name, bases, dct)
+        if name != "Radio":
+            STATIONS[name] = cls
+
 class Radio(object):
+    __metaclass__ = MetaRadio
 
     def __init__(self, notifier):
         self.notifier = notifier
@@ -10,7 +19,7 @@ class Radio(object):
     def now_playing(self):
         return ("", "", "")
 
-class FipRadio(Radio):
+class FIP(Radio):
     live_url = "http://mp3.live.tv-radio.com/fip/all/fiphautdebit.mp3"
 
     def now_playing(self):
@@ -25,13 +34,13 @@ class FipRadio(Radio):
         title = div.findAll("div", attrs={"class": "titre"})[0].text
         return (artist, album, title)
 
-class FranceInterRadio(Radio):
+class FranceInter(Radio):
     live_url = "http://mp3.live.tv-radio.com/franceinter/all/franceinterhautdebit.mp3"
 
-class LeMouvRadio(Radio):
+class LeMouv(Radio):
     live_url = "http://mp3.live.tv-radio.com/lemouv/all/lemouvhautdebit.mp3"
 
-class KcsmRadio(Radio):
+class KCSM(Radio):
     live_url = "http://sc1.abacast.com:8240"
 
     def now_playing(self):
@@ -44,9 +53,3 @@ class KcsmRadio(Radio):
         title = tr[4].span.string.title()
         album = tr[5].span.string.title()
         return (artist, album, title)
-
-STATIONS={"FIP": FipRadio,
-          "FranceInter": FranceInterRadio,
-          "LeMouv": LeMouvRadio,
-          "KCSM": KcsmRadio,
-          }
