@@ -4,7 +4,7 @@ from gi._glib import GError
 
 class Notification:
 
-    def __init__(self, app_name, closed_cb):
+    def __init__(self, app_name, closed_cb=None):
         self.app_name = app_name
         self.summary = ""
         self.body = ""
@@ -23,7 +23,8 @@ class Notification:
             if params[0] != self.id:
                 return
             if signal_name == "NotificationClosed":
-                closed_cb(*params[1:])
+                if closed_cb:
+                    closed_cb(*params[1:])
             elif signal_name == "ActionInvoked":
                 callback = self._actions[params[1]]
                 callback(self, params[1])

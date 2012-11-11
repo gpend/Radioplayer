@@ -24,7 +24,7 @@ class Notifier:
 
         self.station = radios.STATIONS[self.station_name](self)
         self.current_status = None
-        self.notification = desktop_notify.Notification("RadioPlayer", self.closed_cb)
+        self.notification = desktop_notify.Notification("RadioPlayer")
 
         self.login()
         self.start_player()
@@ -33,11 +33,17 @@ class Notifier:
         self.im_manager = imstatus.ImStatusManager(self.bus)
         self.im_manager.save_status()
 
-    def player_paused_or_stopped(self):
+    def _player_suspended(self, player):
         self.suspended = True
         self.notification.clear_actions()
         self.notification.add_action("resume", "Resume playback", self._default_action_cb)
         self.notification.icon_name = "media-playback-stop-symbolic"
+        self.notification.show()
+
+    def _player_resumed(self, player):
+        self.suspended = False
+        self.notification.clear_actions()
+        self.notification.icon_name = "media-playback-start-symbolic"
         self.notification.show()
 
     def _default_action_cb(self, notification, action):
@@ -46,7 +52,9 @@ class Notifier:
     def start_player(self):
         if self.interval:
             self.player = player.Player(self.station.live_url, self.audiosink,
-                                        self.output_path, self.player_paused_or_stopped)
+                                        self.output_path)
+            self.player.connect("suspended", self._player_suspended)
+            self.player.connect("resumed", self._player_resumed)
             self.player.start()
         else:
             self.player = None
@@ -125,15 +133,6 @@ class Notifier:
             self.player.stop(notify=False)
         self.im_manager.restore_status()
         self.loop.quit()
-
-    def closed_cb(self, reason):
-        if self.suspended:
-            self.notification.clear_actions()
-            self.notification.icon_name = "media-playback-start-symbolic"
-            self.suspended = False
-            self.notification.show()
-        elif not self.interval:
-            self.notification.close()
 
     def status(self, name, album, title):
         status = u"♫ %s - %s ♫" % (name, title)

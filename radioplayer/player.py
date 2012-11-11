@@ -10,14 +10,15 @@ else:
     PLAYBIN = "playbin"
     DECODEBIN = "decodebin"
 
-from gi.repository import Gst, Gio, GLib
+from gi.repository import Gst, Gio, GLib, GObject
 
-class Player:
+class Player(GObject.GObject):
 
-    def __init__(self, url, audiosink="autoaudiosink", output_location=None,
-                 paused_or_stopped_cb=None):
-        self._paused_or_stopped_cb = paused_or_stopped_cb
+    def __init__(self, url, audiosink="autoaudiosink", output_location=None):
+        super(Player, self).__init__()
+        GObject.threads_init()
         self._app_name = "radioplayer"
+        self._notify = False
 
         Gst.init([])
 
@@ -57,7 +58,14 @@ class Player:
         bus = self.pipeline.get_bus()
         bus.add_signal_watch()
         bus.connect('message', self._on_gst_message)
-        # TODO: send state notifications using signals
+
+    @GObject.Signal
+    def suspended(self):
+        pass
+
+    @GObject.Signal
+    def resumed(self):
+        pass
 
     def _on_gst_message(self, bus, message):
         if not message:
@@ -78,6 +86,13 @@ class Player:
                     print "Silence detected, restarting playback"
                     self.stop(notify=False)
                     self.start()
+        elif t == Gst.MessageType.STATE_CHANGED and message.src.name == PLAYBIN and self._notify:
+            old_state, new_state, pending_state = message.parse_state_changed()
+            if new_state == Gst.State.PLAYING:
+                self.emit("resumed")
+            elif old_state == Gst.State.PLAYING and new_state == Gst.State.PAUSED:
+                self.emit("suspended")
+                self.pipeline.set_state(Gst.State.NULL)
 
     def _key_pressed(self, app, key):
         if app != self._app_name:
@@ -95,17 +110,15 @@ class Player:
         self.pipeline.set_state(Gst.State.PLAYING)
 
     def stop(self, *args, **kwargs):
-        notify = kwargs.get("notify", True)
-        self.pipeline.set_state(Gst.State.NULL)
-        if notify and self._paused_or_stopped_cb:
-            self._paused_or_stopped_cb()
+        self._notify = kwargs.get("notify", True)
+        # FIXME: Setting to NULL directly we don't get the state-change messages on the bus.
+        # So set to PAUSED and later on to NULL if we come from PLAYING in the message handler.
+        self.pipeline.set_state(Gst.State.PAUSED)
 
     def toggle_play(self):
         result, state, pending = self.pipeline.get_state(0)
         if state == Gst.State.PLAYING:
             new_state = Gst.State.PAUSED
-            if self._paused_or_stopped_cb:
-                self._paused_or_stopped_cb()
         else:
             new_state = Gst.State.PLAYING
         self.pipeline.set_state(new_state)
