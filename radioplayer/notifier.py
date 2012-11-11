@@ -102,6 +102,23 @@ class Notifier:
 
         return (artist_nice_name, album_title, track_nice_name, duration, mbid)
 
+    def _execute_with_pylast(self, function, *args, **kwargs):
+        try:
+            function(*args, **kwargs)
+        except Exception, exc:
+            # Something went wrong, try 2 more times and die.
+            attempts = 2
+            while attempts > 0:
+                try:
+                    function(*args, **kwargs)
+                except Exception, exc:
+                    attempts -= 1
+                    continue
+                else:
+                    break
+            if not attempts:
+                print "Scrobble failed..."
+
     def scrobble_update_now_playing(self, current):
         if self.disable_scrobble:
             return
@@ -109,7 +126,8 @@ class Notifier:
             return
         artist_nice_name, album_title, track_nice_name, duration, mbid = self._retrieve_song_infos(current)
         if self.lastfm:
-            self.lastfm.update_now_playing(artist_nice_name, track_nice_name, album=album_title, duration=duration, mbid=mbid)
+            self._execute_with_pylast(getattr(self.lastfm, "update_now_playing"), artist_nice_name, track_nice_name,
+                                      album=album_title, duration=duration, mbid=mbid)
 
     def scrobble_song(self, current_status):
         if self.disable_scrobble:
@@ -119,15 +137,9 @@ class Notifier:
         artist_nice_name, album_title, track_nice_name, duration, mbid = self._retrieve_song_infos(current_status)
         now = int(time.time())
         if self.lastfm:
-            try:
-                self.lastfm.scrobble(artist_nice_name, track_nice_name, now, album_title, album_artist=None, track_number=None, duration=duration, stream_id=None, context=None, mbid=mbid)
-            except socket.error:
-                return
-            except httplib.BadStatusLine:
-                sys.exit(-1)
-            except pylast.WSError:
-                # FIXME: Deal properly with this one...
-                pass
+            self._execute_with_pylast(getattr(self.lastfm, "scrobble"), artist_nice_name, track_nice_name,
+                                      now, album_title, album_artist=None, track_number=None, duration=duration,
+                                      stream_id=None, context=None, mbid=mbid)
 
         if self.librefm:
             source = pylast.SCROBBLE_SOURCE_NON_PERSONALIZED_BROADCAST
@@ -135,11 +147,8 @@ class Notifier:
             scrobble_args = (artist_nice_name, track_nice_name,
                              now, source, mode, duration, album_title,)
             scrobble_kwargs = dict(mbid=mbid)
-            try:
-                self.librefm.get_scrobbler("tst", "1.0").scrobble(*scrobble_args,
-                                                                  **scrobble_kwargs)
-            except (socket.error,pylast.ScrobblingError), error:
-                print error
+            scrobbler = self.librefm.get_scrobbler("tst", "1.0")
+            self._execute_with_pylast(getattr(scrobbler, "scrobble"), *scrobble_args, **scrobble_kwargs)
 
     def stop(self):
         self.notification.close()
@@ -173,21 +182,7 @@ class Notifier:
             print message
             self.im_manager.set_status_async(message)
             if self.current_status:
-                try:
-                    self.scrobble_song(self.current_status)
-                except Exception, exc:
-                    # Something went wrong, try 2 more times and die.
-                    attempts = 2
-                    while attempts > 0:
-                        try:
-                            self.scrobble_song(self.current_status)
-                        except Exception, exc:
-                            attempts -= 1
-                            continue
-                        else:
-                            break
-                    if not attempts:
-                        print "Scrobble failed..."
+                self.scrobble_song(self.current_status)
             self.scrobble_update_now_playing(current)
             self.player.ping_gnome()
         self.current_status = current
