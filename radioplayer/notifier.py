@@ -88,8 +88,8 @@ class Notifier:
         mbid = ""
         if self.lastfm:
             search_results = self.lastfm.search_for_track(artist_name, track_name)
-            page = search_results.get_next_page()
-            if len(page) > 0:
+            page = self._execute_with_pylast(getattr(search_results, "get_next_page"))
+            if page and len(page) > 0:
                 track = page[0]
                 if not album_title:
                     album = track.get_album()
@@ -104,20 +104,22 @@ class Notifier:
 
     def _execute_with_pylast(self, function, *args, **kwargs):
         try:
-            function(*args, **kwargs)
+            result = function(*args, **kwargs)
         except Exception, exc:
             # Something went wrong, try 2 more times and die.
             attempts = 2
             while attempts > 0:
                 try:
-                    function(*args, **kwargs)
+                    result = function(*args, **kwargs)
                 except Exception, exc:
                     attempts -= 1
                     continue
                 else:
                     break
             if not attempts:
-                print "Scrobble failed..."
+                print "Call to %r failed..." % function
+                result = None
+        return result
 
     def scrobble_update_now_playing(self, current):
         if self.disable_scrobble:
