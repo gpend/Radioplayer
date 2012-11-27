@@ -95,8 +95,12 @@ class Notifier:
                     album = track.get_album()
                     if album:
                         album_title = album.title
-                duration = int(track.get_duration() / 1000.)
-                mbid = track.get_mbid() or ""
+                duration = self._execute_with_pylast(track.get_duration)
+                if duration:
+                    duration = int(duration / 1000.)
+                else:
+                    duration = 0
+                mbid = self._execute_with_pylast(track.get_mbid) or ""
                 artist_nice_name = track.artist.name
                 track_nice_name = track.title
 
