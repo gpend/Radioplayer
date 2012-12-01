@@ -131,6 +131,8 @@ class ImStatusManager:
             self.im_proxies[service_name] = proxy
 
     def _on_name_appeared(self, connection, service, *data):
+        if service in self.im_proxies:
+            return
         klass = self.im_proxy_classes.get(service)
         if klass:
             proxy = klass(self._bus)
