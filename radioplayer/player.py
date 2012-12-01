@@ -13,6 +13,9 @@ else:
 from gi.repository import Gst, Gio, GLib, GObject
 
 class Player(GObject.GObject):
+    __gsignals__ = { 'suspended': (GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ()),
+                     'resumed': (GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
+    }
 
     def __init__(self, url, audiosink="autoaudiosink", output_location=None):
         super(Player, self).__init__()
@@ -59,12 +62,10 @@ class Player(GObject.GObject):
         bus.add_signal_watch()
         bus.connect('message', self._on_gst_message)
 
-    @GObject.Signal
-    def suspended(self):
+    def do_suspended(self):
         pass
 
-    @GObject.Signal
-    def resumed(self):
+    def do_resumed(self):
         pass
 
     def _on_gst_message(self, bus, message):
