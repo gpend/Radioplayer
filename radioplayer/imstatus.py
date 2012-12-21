@@ -8,7 +8,7 @@ class DBusException(Exception):
 class UnknownServiceException(DBusException):
     pass
 
-class ImProxy:
+class ImProxy(object):
     saved_status = ""
     service_name = ""
     object_path = ""
@@ -105,7 +105,7 @@ class GajimProxy(ImProxy):
 
 
 class ImStatusManager:
-    ProxyTypes = [PidginProxy, TelepathyProxy, GajimProxy]
+    ProxyTypes = globals()['ImProxy'].__subclasses__()
     im_proxy_classes = dict([(p.service_name, p) for p in
                              ProxyTypes])
 
