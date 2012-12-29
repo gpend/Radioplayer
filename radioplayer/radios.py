@@ -22,17 +22,26 @@ class Radio(object):
 class FIP(Radio):
     live_url = "http://mp3.live.tv-radio.com/fip/all/fiphautdebit.mp3"
 
+    def __init__(self, notifier):
+        super(FIP, self).__init__(notifier)
+        self._cache_expires = None
+        self._cache = None
+
     def now_playing(self):
-        now = int(round(time.time() * 1000))
+        now = int(round(time.time()))
+        if self._cache_expires and now < self._cache_expires:
+            return self._cache
         url =  "http://fipradio.fr/sites/default/files/direct-large.json?_=%s" % now
         data = urllib2.urlopen(url).read()
         json_data = json.loads(data)
+        self._cache_expires = int(json_data["validite"])
         soup = BeautifulSoup.BeautifulSoup(json_data["html"])
         div =  soup.findAll("div", attrs={"class":"direct-item direct-distance-0 current"})[0]
         artist = div.findAll("div", attrs={"class": "artiste"})[0].text
         album = div.findAll("div", attrs={"class": "album"})[0].text
         title = div.findAll("div", attrs={"class": "titre"})[0].text
-        return (artist, album, title)
+        self._cache = (artist, album, title)
+        return self._cache
 
 class FranceInter(Radio):
     live_url = "http://mp3.live.tv-radio.com/franceinter/all/franceinterhautdebit.mp3"
