@@ -12,25 +12,27 @@ class MetaRadio(type):
 
 class Radio(object):
     __metaclass__ = MetaRadio
+    advising_cache_time = False
 
-    def __init__(self, notifier):
-        self.notifier = notifier
+    def next_update_timestamp(self):
+        return None
 
     def now_playing(self):
         return ("", "", "")
 
 class FIP(Radio):
     live_url = "http://mp3.live.tv-radio.com/fip/all/fiphautdebit.mp3"
+    advising_cache_time = True
 
-    def __init__(self, notifier):
-        super(FIP, self).__init__(notifier)
+    def __init__(self):
+        super(FIP, self).__init__()
         self._cache_expires = None
-        self._cache = None
+
+    def next_update_timestamp(self):
+        return self._cache_expires
 
     def now_playing(self):
         now = int(round(time.time()))
-        if self._cache_expires and now < self._cache_expires:
-            return self._cache
         url =  "http://fipradio.fr/sites/default/files/direct-large.json?_=%s" % now
         data = urllib2.urlopen(url).read()
         json_data = json.loads(data)
@@ -40,8 +42,7 @@ class FIP(Radio):
         artist = div.findAll("div", attrs={"class": "artiste"})[0].text
         album = div.findAll("div", attrs={"class": "album"})[0].text
         title = div.findAll("div", attrs={"class": "titre"})[0].text
-        self._cache = (artist, album, title)
-        return self._cache
+        return (artist, album, title)
 
 class FranceInter(Radio):
     live_url = "http://mp3.live.tv-radio.com/franceinter/all/franceinterhautdebit.mp3"
