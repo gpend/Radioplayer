@@ -20,9 +20,10 @@ class Notifier:
         self.disable_scrobble = noscrobble
         self.config = config
 
+        self.timeout_id = 0
         self.suspended = False
 
-        self.station = radios.STATIONS[self.station_name](self)
+        self.station = radios.STATIONS[self.station_name]()
         self.current_status = None
         self.notification = desktop_notify.Notification("RadioPlayer")
 
@@ -184,6 +185,12 @@ class Notifier:
 
         if "" not in (current[0], current[2]) and (not self.current_status or \
                                   (current != self.current_status)):
+            if self.station.advising_cache_time:
+                if self.timeout_id:
+                    GLib.source_remove(self.timeout_id)
+                delta = self.station.next_update_timestamp() - time.time()
+                self.timeout_id = GLib.timeout_add_seconds(int(delta), self.update)
+
             message = self.status(*current)
             print message
             self.im_manager.set_status_async(message)
@@ -191,12 +198,14 @@ class Notifier:
                 self.scrobble_song(self.current_status)
             self.scrobble_update_now_playing(current)
             self.player.ping_gnome()
+
         self.current_status = current
-        return True
+
+        return not self.station.advising_cache_time
 
     def run(self):
         self.update()
-        if self.interval:
+        if self.interval and not self.timeout_id:
             self.timeout_id = GLib.timeout_add_seconds(self.interval, self.update)
         try:
             self.loop.run()
