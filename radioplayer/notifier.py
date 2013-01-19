@@ -189,6 +189,8 @@ class Notifier:
                 if self.timeout_id:
                     GLib.source_remove(self.timeout_id)
                 delta = self.station.next_update_timestamp() - time.time()
+                if delta <= 0:
+                    delta = 5
                 self.timeout_id = GLib.timeout_add_seconds(int(delta), self.update)
 
             message = self.status(*current)
