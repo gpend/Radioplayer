@@ -22,6 +22,9 @@ class Player(GObject.GObject):
         GObject.threads_init()
         self._app_name = "radioplayer"
         self._notify = False
+        self._url = url
+        self._audiosink = audiosink
+        self._output_location = output_location
 
         Gst.init([])
 
@@ -38,13 +41,16 @@ class Player(GObject.GObject):
 
         self.proxy.connect("g-signal", on_signal)
 
-        if not output_location:
+        self._configure_pipeline()
+
+    def _configure_pipeline(self):
+        if not self._output_location:
             self.pipeline = Gst.ElementFactory.make(PLAYBIN, "playbin")
-            self.pipeline.props.uri = url
+            self.pipeline.props.uri = self._url
             self.sinkbin = Gst.ElementFactory.make("bin", "audiobin")
             level = Gst.ElementFactory.make("level", "audiolevel")
             level.props.interval = 5000000000
-            sink = Gst.ElementFactory.make(audiosink, "audiosink")
+            sink = Gst.ElementFactory.make(self._audiosink, "audiosink")
             self.sinkbin.add(level)
             self.sinkbin.add(sink)
             level.link(sink)
@@ -55,9 +61,9 @@ class Player(GObject.GObject):
             self.pipeline = Gst.parse_launch("souphttpsrc location=%s "
                                              "! tee name=t queue t. ! %s "
                                              "! %s t. ! queue "
-                                             "! filesink location=%s" % (url, DECODEBIN,
-                                                                         audiosink,
-                                                                         output_location))
+                                             "! filesink location=%s" % (self._url, DECODEBIN,
+                                                                         self._audiosink,
+                                                                         self._output_location))
         bus = self.pipeline.get_bus()
         bus.add_signal_watch()
         bus.connect('message', self._on_gst_message)
@@ -76,7 +82,9 @@ class Player(GObject.GObject):
             err, debug = message.parse_error()
             print "Error: %s" % err, debug
             print "Restarting..."
-            self.stop()
+            self.pipeline.set_state(Gst.State.NULL)
+            self.pipeline = None
+            self._configure_pipeline()
             self.start()
         elif t == Gst.MessageType.ELEMENT:
             structure = message.get_structure()
