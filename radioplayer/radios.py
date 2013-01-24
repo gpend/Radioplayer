@@ -50,6 +50,14 @@ class FranceInter(Radio):
 class LeMouv(Radio):
     live_url = "http://mp3.live.tv-radio.com/lemouv/all/lemouvhautdebit.mp3"
 
+    def now_playing(self):
+        data = urllib2.urlopen("http://www.lemouv.fr/").read()
+        soup = BeautifulSoup.BeautifulSoup(data)
+        encours = soup.findAll("span", attrs={"class":"direct-antenne"})[0]
+        artist = encours.find("span", attrs={"class": "artiste"}).contents[0]
+        title = encours.find("span", attrs={"class": "titre"}).contents[0]
+        return (artist, "", title)
+
 class KCSM(Radio):
     live_url = "http://sc1.abacast.com:8240"
 
