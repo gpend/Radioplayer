@@ -49,13 +49,27 @@ class FranceInter(Radio):
 
 class LeMouv(Radio):
     live_url = "http://mp3.live.tv-radio.com/lemouv/all/lemouvhautdebit.mp3"
+    advising_cache_time = True
+
+    def __init__(self):
+        super(LeMouv, self).__init__()
+        self._cache_expires = None
+
+    def next_update_timestamp(self):
+        return self._cache_expires
 
     def now_playing(self):
-        data = urllib2.urlopen("http://www.lemouv.fr/").read()
-        soup = BeautifulSoup.BeautifulSoup(data)
-        encours = soup.findAll("span", attrs={"class":"direct-antenne"})[0]
-        artist = encours.find("span", attrs={"class": "artiste"}).contents[0]
-        title = encours.find("span", attrs={"class": "titre"}).contents[0]
+        now = int(round(time.time()))
+        url =  "http://www.lemouv.com/sites/default/files/direct.json?_=%s" % now
+        data = urllib2.urlopen(url).read()
+        json_data = json.loads(data)
+        self._cache_expires = int(json_data["validite"])
+        if (self._cache_expires - now) > 400:
+            self._cache_expires = now + 300
+        soup = BeautifulSoup.BeautifulSoup(json_data["html"])
+        span =  soup.findAll("span", attrs={"class":"direct-antenne"})[0]
+        artist = span.findAll("span", attrs={"class": "artiste"})[0].text
+        title = span.findAll("span", attrs={"class": "titre"})[0].text
         return (artist, "", title)
 
 class KCSM(Radio):
