@@ -67,10 +67,14 @@ class LeMouv(Radio):
         if (self._cache_expires - now) > 400:
             self._cache_expires = now + 300
         soup = BeautifulSoup.BeautifulSoup(json_data["html"])
-        span =  soup.findAll("span", attrs={"class":"direct-antenne"})[0]
-        artist = span.findAll("span", attrs={"class": "artiste"})[0].text
-        title = span.findAll("span", attrs={"class": "titre"})[0].text
-        return (artist, "", title)
+        try:
+            span =  soup.findAll("span", attrs={"class":"direct-antenne"})[0]
+            artist = span.findAll("span", attrs={"class": "artiste"})[0].text
+            title = span.findAll("span", attrs={"class": "titre"})[0].text
+        except:
+            return ("", "", "")
+        else:
+            return (artist, "", title)
 
 class KCSM(Radio):
     live_url = "http://sc1.abacast.com:8240"
