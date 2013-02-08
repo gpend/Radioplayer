@@ -188,6 +188,7 @@ class Notifier:
             if self.station.advising_cache_time:
                 if self.timeout_id:
                     GLib.source_remove(self.timeout_id)
+                    self.timeout_id = 0
                 delta = self.station.next_update_timestamp() - time.time()
                 if delta <= 0:
                     delta = 5
@@ -200,6 +201,12 @@ class Notifier:
                 self.scrobble_song(self.current_status)
             self.scrobble_update_now_playing(current)
             self.player.ping_gnome()
+        elif self.station.advising_cache_time:
+            if self.timeout_id:
+                GLib.source_remove(self.timeout_id)
+                self.timeout_id = 0
+            delta = 5
+            self.timeout_id = GLib.timeout_add_seconds(int(delta), self.update)
 
         self.current_status = current
 
