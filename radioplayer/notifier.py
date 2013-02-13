@@ -11,13 +11,13 @@ from radioplayer import player, radios, pylast, imstatus, desktop_notify
 
 class Notifier:
 
-    def __init__(self, interval, station, audiosink, output, noscrobble, config):
+    def __init__(self, options, config):
         self.loop = GLib.MainLoop()
-        self.interval = interval
-        self.station_name = station
-        self.audiosink = audiosink
-        self.output_path = output
-        self.disable_scrobble = noscrobble
+        self.interval = options.interval
+        self.station_name = options.station
+        self.audiosink = options.audiosink
+        self.output_path = options.output
+        self.disable_scrobble = options.noscrobble
         self.config = config
 
         self.timeout_id = 0
