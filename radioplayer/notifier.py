@@ -18,6 +18,7 @@ class Notifier:
         self.audiosink = options.audiosink
         self.output_path = options.output
         self.disable_scrobble = options.noscrobble
+        self.disable_imstatus = options.noimstatus
         self.config = config
 
         self.timeout_id = 0
@@ -32,7 +33,8 @@ class Notifier:
 
         self.bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
         self.im_manager = imstatus.ImStatusManager(self.bus)
-        self.im_manager.save_status()
+        if not self.disable_imstatus:
+            self.im_manager.save_status()
 
     def _player_suspended(self, player):
         self.suspended = True
@@ -161,7 +163,8 @@ class Notifier:
         self.notification.close()
         if self.player:
             self.player.stop(notify=False)
-        self.im_manager.restore_status()
+        if not self.disable_imstatus:
+            self.im_manager.restore_status()
         self.loop.quit()
 
     def status(self, name, album, title):
@@ -196,7 +199,8 @@ class Notifier:
 
             message = self.status(*current)
             print message
-            self.im_manager.set_status_async(message)
+            if not self.disable_imstatus:
+                self.im_manager.set_status_async(message)
             if self.current_status:
                 self.scrobble_song(self.current_status)
             self.scrobble_update_now_playing(current)

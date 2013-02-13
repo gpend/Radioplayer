@@ -26,6 +26,9 @@ def main(args=None):
     parser.add_option("-l", "--list-stations", action="store_true", default=False,
                       dest="list_stations",
                       help="display the list of radio stations")
+    parser.add_option("-m", "--no-imstatus", action="store_true", default=False,
+                      dest="noimstatus",
+                      help="disable IM status update")
 
     (options, args) = parser.parse_args(args)
 
