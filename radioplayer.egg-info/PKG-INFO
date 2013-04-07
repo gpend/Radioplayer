@@ -1,4 +1,4 @@
-Metadata-Version: 1.0
+Metadata-Version: 1.1
 Name: radioplayer
 Version: 0.1
 Summary: A little radio player
@@ -8,15 +8,16 @@ Author-email: phil@base-art.net
 License: GPL2
 Download-URL: http://base-art.net/static/radioplayer-0.1.tar.gz
 Description: 
-        A simple python radio player
+        A simple radio player implemented in Python.
         
-        Currently supports only FIP and FranceInter.
+        Currently supports FIP, LeMouv, FranceInter and KCSM.
         
         Dependencies:
         
-        - pynotify
-        - python-dbus
-        - gst-python
+        - python-gi
+        - gstreamer
+        - gst-plugins-base
+        - gst-plugins-good
         
         Features:
         
