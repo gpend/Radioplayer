@@ -89,3 +89,6 @@ class KCSM(Radio):
         title = tr[4].span.string.title()
         album = tr[5].span.string.title()
         return (artist, album, title)
+
+class Radio3(Radio):
+    live_url = 'http://195.10.10.219/rtve/radio3.mp3'
