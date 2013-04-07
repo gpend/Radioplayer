@@ -1,6 +1,5 @@
 
 from gi.repository import GLib, Gio
-from gi._glib import GError
 
 class DBusException(Exception):
     pass
