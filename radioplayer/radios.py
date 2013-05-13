@@ -87,7 +87,10 @@ class KCSM(Radio):
         time = tr[1].div.string
         artist = tr[3].string.title()
         title = tr[4].span.string.title()
-        album = tr[5].span.string.title()
+        if tr[5].span.string:
+            album = tr[5].span.string.title()
+        else:
+            album = ''
         return (artist, album, title)
 
 class Radio3(Radio):
