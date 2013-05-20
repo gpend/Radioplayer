@@ -17,7 +17,7 @@ class Player(GObject.GObject):
                      'resumed': (GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
     }
 
-    def __init__(self, url, audiosink="autoaudiosink", output_location=None):
+    def __init__(self, url, audiosink="autoaudiosink", output_location=None, headless=False):
         super(Player, self).__init__()
         GObject.threads_init()
         self._app_name = "radioplayer"
@@ -25,8 +25,13 @@ class Player(GObject.GObject):
         self._url = url
         self._audiosink = audiosink
         self._output_location = output_location
+        self._headless = headless
 
         Gst.init([])
+        self._configure_pipeline()
+
+        if headless:
+            return
 
         bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
         self.proxy = Gio.DBusProxy.new_sync(bus, 0, None, "org.gnome.SettingsDaemon",
@@ -40,8 +45,6 @@ class Player(GObject.GObject):
                 self._key_pressed(*parameters)
 
         self.proxy.connect("g-signal", on_signal)
-
-        self._configure_pipeline()
 
     def _configure_pipeline(self):
         if not self._output_location:
@@ -112,6 +115,8 @@ class Player(GObject.GObject):
             self.stop()
 
     def ping_gnome(self):
+        if self._headless:
+            return
         variant_args = GLib.Variant("(su)", (self._app_name, 0))
         result  = self.proxy.call_sync("GrabMediaPlayerKeys", variant_args, 0, -1, None)
 

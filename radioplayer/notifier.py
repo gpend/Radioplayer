@@ -63,7 +63,7 @@ class Notifier:
     def start_player(self):
         if self.interval:
             self.player = player.Player(self.station.live_url, self.audiosink,
-                                        self.output_path)
+                                        self.output_path, self.headless)
             self.player.connect("suspended", self._player_suspended)
             self.player.connect("resumed", self._player_resumed)
             self.player.start()
