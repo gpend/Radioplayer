@@ -61,15 +61,63 @@ class Player(GObject.GObject):
             self.sinkbin.add_pad(Gst.GhostPad.new("sink", sinkpad))
             self.pipeline.props.audio_sink = self.sinkbin
         else:
-            self.pipeline = Gst.parse_launch("souphttpsrc location=%s "
+            self.pipeline = Gst.parse_launch("souphttpsrc name=src location=%s "
                                              "! tee name=t queue t. ! %s "
-                                             "! %s t. ! queue "
+                                             "! %s name=audiosink t. ! queue "
                                              "! filesink location=%s" % (self._url, DECODEBIN,
                                                                          self._audiosink,
                                                                          self._output_location))
         bus = self.pipeline.get_bus()
         bus.add_signal_watch()
         bus.connect('message', self._on_gst_message)
+
+    def set_url(self, url):
+        self._url = url
+        self.stop(notify=False)
+        if not self._output_location:
+            self.pipeline.props.uri = self._url
+        else:
+            src = self.pipeline.get_child_by_name("src")
+            src.props.location = self._url
+
+        self.start()
+
+    def update_volume(self, delta):
+        def apply_volume(props):
+            value = self.pipeline.props.volume + delta
+            # Clamp between 0 and 1.
+            props.volume = max(min(value, 1.), 0.)
+
+        if not self._output_location:
+            apply_volume(self.pipeline.props)
+        else:
+            sink = self.sinkbin.get_child_by_name("audiosink")
+            if not sink:
+                return
+            try:
+                apply_volume(sink.props)
+            except:
+                child = sink.get_child_by_index(0)
+                apply_volume(child.props)
+
+    def increment_volume(self):
+        self.update_volume(0.1)
+
+    def decrement_volume(self):
+        self.update_volume(float(-0.1))
+
+    def toggle_mute(self):
+        if not self._output_location:
+            self.pipeline.props.mute = not self.pipeline.props.mute
+        else:
+            sink = self.sinkbin.get_child_by_name("audiosink")
+            if not sink:
+                return
+            try:
+                sink.props.mute = not sink.props.mute
+            except:
+                child = sink.get_child_by_index(0)
+                child.props.mute = not sink.props.mute
 
     def do_suspended(self):
         pass

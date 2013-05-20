@@ -7,7 +7,7 @@ import httplib
 import socket
 from gi.repository import GLib, Gio
 
-from radioplayer import player, radios, pylast, imstatus, desktop_notify
+from radioplayer import player, radios, pylast, imstatus, desktop_notify, lirc_input
 
 class Notifier:
 
@@ -35,9 +35,35 @@ class Notifier:
         self.login()
         self.start_player()
 
+        self.input_provider = lirc_input.InputProvider(config, self)
+        self.input_provider.start()
+
         if not self.disable_imstatus:
             self.im_manager = imstatus.ImStatusManager(self.headless)
             self.im_manager.save_status()
+
+    def handle_input(self, code):
+        if code.startswith("key_"):
+            idx = int(code[4:])
+            stations = radios.STATIONS.keys()
+            stations.sort()
+            self.station_name = stations[idx-1]
+            print self.station_name
+            self.station = radios.STATIONS[self.station_name]()
+            self.player.set_url(self.station.live_url)
+            self.update()
+        elif code in ("pause", "stop"):
+            self.player.stop()
+        elif code == "play":
+            self.player.start()
+        elif code == "increment_volume":
+            self.player.increment_volume()
+        elif code == "decrement_volume":
+            self.player.decrement_volume()
+        elif code == "mute":
+            self.player.toggle_mute()
+        else:
+            print "Unhandled input: %s" % code
 
     def _player_suspended(self, player):
         self.suspended = True

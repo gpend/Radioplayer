@@ -1,0 +1,171 @@
+
+begin
+    prog = radioplayer
+    button = KEY_NUMERIC_1
+    config = key_1
+    repeat = 0
+    delay = 0
+end
+begin
+    prog = radioplayer
+    button = KEY_NUMERIC_2
+    config = key_2
+    repeat = 0
+    delay = 0
+end
+begin
+    prog = radioplayer
+    button = KEY_NUMERIC_3
+    config = key_3
+    repeat = 0
+    delay = 0
+end
+begin
+    prog = radioplayer
+    button = KEY_NUMERIC_4
+    config = key_4
+    repeat = 0
+    delay = 0
+end
+
+begin
+    prog = radioplayer
+    button = KEY_POWER
+    config = power
+    repeat = 0
+    delay = 0
+end
+
+begin
+    prog = radioplayer
+    button = KEY_UP
+    config = up
+    repeat = 0
+    delay = 0
+end
+begin
+    prog = radioplayer
+    button = KEY_DOWN
+    config = down
+    repeat = 0
+    delay = 0
+end
+begin
+    prog = radioplayer
+    button = KEY_LEFT
+    config = left
+    repeat = 0
+    delay = 0
+end
+begin
+    prog = radioplayer
+    button = KEY_RIGHT
+    config = right
+    repeat = 0
+    delay = 0
+end
+
+begin
+    prog = radioplayer
+    button = KEY_OK
+    config = ok
+    repeat = 0
+    delay = 0
+end
+
+begin
+    prog = radioplayer
+    button = KEY_MENU
+    config = menu
+    repeat = 0
+    delay = 0
+end
+
+begin
+    prog = radioplayer
+    button = KEY_EXIT
+    config = exit
+    repeat = 0
+    delay = 0
+end
+
+begin
+    prog = radioplayer
+    button = KEY_PLAY
+    config = play
+    repeat = 0
+    delay = 0
+end
+begin
+    prog = radioplayer
+    button = KEY_PAUSE
+    config = pause
+    repeat = 0
+    delay = 0
+end
+begin
+    prog = radioplayer
+    button = KEY_STOP
+    config = stop
+    repeat = 0
+    delay = 0
+end
+begin
+    prog = radioplayer
+    button = KEY_FASTFORWARD
+    config = fast_forward
+    repeat = 0
+    delay = 0
+
+end
+begin
+    prog = radioplayer
+    button = KEY_REWIND
+    config = rewind
+    repeat = 0
+    delay = 0
+end
+begin
+    prog = radioplayer
+    button = KEY_FORWARD
+    config = forward
+    repeat = 0
+    delay = 0
+end
+begin
+    prog = radioplayer
+    button = KEY_BACK
+    config = back
+    repeat = 0 
+    delay = 0
+end
+
+begin
+    prog = radioplayer
+    button = KEY_RED
+    config = red
+    repeat = 0
+    delay = 0
+end
+
+begin
+    prog = radioplayer
+    button = KEY_MUTE
+    config = mute
+    repeat = 0
+    delay = 0
+end
+begin
+    prog = radioplayer
+    button = KEY_VOLUMEUP
+    config = increment_volume
+    repeat = 0
+    delay = 0
+end
+begin
+    prog = radioplayer
+    button = KEY_VOLUMEDOWN
+    config = decrement_volume
+    repeat = 0
+    delay = 0
+end
