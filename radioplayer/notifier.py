@@ -35,9 +35,8 @@ class Notifier:
         self.login()
         self.start_player()
 
-        self.bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
-        self.im_manager = imstatus.ImStatusManager(self.bus)
         if not self.disable_imstatus:
+            self.im_manager = imstatus.ImStatusManager(self.headless)
             self.im_manager.save_status()
 
     def _player_suspended(self, player):

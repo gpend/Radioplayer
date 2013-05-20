@@ -108,11 +108,16 @@ class ImStatusManager:
     im_proxy_classes = dict([(p.service_name, p) for p in
                              ProxyTypes])
 
-    def __init__(self, bus):
+    def __init__(self, headless):
         self._timeout = None
-        self._bus = bus
+        self._headless = headless
         self.im_proxies = {}
 
+        if self._headless:
+           print "IM status support disabled due to headless mode"
+           return
+
+        self._bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
         self._load_all_proxies()
 
         for t in self.ProxyTypes:
