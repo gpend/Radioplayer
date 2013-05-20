@@ -19,6 +19,7 @@ class Notifier:
         self.output_path = options.output
         self.disable_scrobble = options.noscrobble
         self.disable_imstatus = options.noimstatus
+        self.headless = options.headless
         self.config = config
 
         self.timeout_id = 0
@@ -26,7 +27,10 @@ class Notifier:
 
         self.station = radios.STATIONS[self.station_name]()
         self.current_status = None
-        self.notification = desktop_notify.Notification("RadioPlayer")
+        if not self.headless:
+            self.notification = desktop_notify.Notification("RadioPlayer")
+        else:
+            self.notification = None
 
         self.login()
         self.start_player()
@@ -38,6 +42,8 @@ class Notifier:
 
     def _player_suspended(self, player):
         self.suspended = True
+        if not self.notification:
+            return
         self.notification.clear_actions()
         self.notification.add_action("resume", "Resume playback", self._default_action_cb)
         self.notification.icon_name = "media-playback-stop-symbolic"
@@ -45,6 +51,8 @@ class Notifier:
 
     def _player_resumed(self, player):
         self.suspended = False
+        if not self.notification:
+            return
         self.notification.clear_actions()
         self.notification.icon_name = "media-playback-start-symbolic"
         self.notification.show()
@@ -160,7 +168,8 @@ class Notifier:
             self._execute_with_pylast(getattr(scrobbler, "scrobble"), *scrobble_args, **scrobble_kwargs)
 
     def stop(self):
-        self.notification.close()
+        if self.notification:
+            self.notification.close()
         if self.player:
             self.player.stop(notify=False)
         if not self.disable_imstatus:
@@ -169,9 +178,10 @@ class Notifier:
 
     def status(self, name, album, title):
         status = u"♫ %s - %s ♫" % (name, title)
-        self.notification.update(self.station_name, status)
-        self.notification.icon_name = "media-playback-start-symbolic"
-        self.notification.show()
+        if self.notification:
+            self.notification.update(self.station_name, status)
+            self.notification.icon_name = "media-playback-start-symbolic"
+            self.notification.show()
         GLib.setenv("PA_PROP_MEDIA_ARTIST", name, True)
         GLib.setenv("PA_PROP_MEDIA_TITLE", title, True)
         return "%s: %s" % (self.station_name, status)

@@ -29,6 +29,9 @@ def main(args=None):
     parser.add_option("-m", "--no-imstatus", action="store_true", default=False,
                       dest="noimstatus",
                       help="disable IM status update")
+    parser.add_option("-x", "--headless", action="store_true", default=False,
+                      dest="headless",
+                      help="disable desktop notifications")
 
     (options, args) = parser.parse_args(args)
 
