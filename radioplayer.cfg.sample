@@ -1,0 +1,10 @@
+[scrobbler-lastfm]
+user = foo
+password_hash = <md5sum here>
+
+[scrobbler-librefm]
+user = boo
+password_hash = <md5sum here>
+
+[lirc]
+keymap = /path/to/some/lircrc/like/streamzap.lirc

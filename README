@@ -18,3 +18,14 @@ Features:
 - optionally dump the stream to a local file
 - multimedia keys support (stop, playpause)
 - IM message status update (pidgin, gajim, telepathy)
+
+To install:
+
+- Use gen_pylast_md5sum.py to get your password hashes for libre.fm/last.fm
+- Copy radioplayer.cfg.sample to ~/.config and edit accordingly
+- Run either one of these commands:
+
+  ::
+
+     sudo python setup.py develop
+     sudo python setup.py install
