@@ -84,7 +84,7 @@ class Player(GObject.GObject):
 
     def update_volume(self, delta):
         def apply_volume(props):
-            value = self.pipeline.props.volume + delta
+            value = props.volume + delta
             # Clamp between 0 and 1.
             props.volume = max(min(value, 1.), 0.)
 
