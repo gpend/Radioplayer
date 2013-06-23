@@ -212,6 +212,8 @@ class Notifier:
         return "%s: %s" % (self.station_name, status)
 
     def update(self):
+        if self.suspended:
+            return True
         try:
             current = self.station.now_playing()
         except urllib2.URLError, exc:
