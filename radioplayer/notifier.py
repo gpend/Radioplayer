@@ -52,10 +52,10 @@ class Notifier:
             self.station = radios.STATIONS[self.station_name]()
             self.player.set_url(self.station.live_url)
             self.update()
-        elif code in ("pause", "stop"):
+        elif code in ("pause", "play"):
+            self.player.toggle_play()
+        elif code == "stop":
             self.player.stop()
-        elif code == "play":
-            self.player.start()
         elif code == "increment_volume":
             self.player.increment_volume()
         elif code == "decrement_volume":
