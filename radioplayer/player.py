@@ -73,7 +73,7 @@ class Player(GObject.GObject):
 
     def set_url(self, url):
         self._url = url
-        self.stop(notify=False)
+        self.pipeline.set_state(Gst.State.NULL)
         if not self._output_location:
             self.pipeline.props.uri = self._url
         else:
