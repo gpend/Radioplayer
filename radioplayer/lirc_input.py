@@ -1,10 +1,12 @@
 import select
-from gi.repository import GLib
+from gi.repository import GLib, Gio, GObject
 
 try:
     import pylirc
 except ImportError:
     pylirc = None
+
+GObject.threads_init()
 
 class InputProvider:
 
@@ -16,14 +18,14 @@ class InputProvider:
         rc_file = config.get("lirc", "keymap")
         self.socket = pylirc.init('radioplayer', rc_file)
 
-    def _do_poll(self, p):
+    def _do_poll(self, job, cancellable, p):
         result = p.poll()
         for fd, event in result:
             if event == select.POLLIN:
                 code = pylirc.nextcode()
                 if code:
                     self.notifier.handle_input(code[0])
-        return True
+        Gio.io_scheduler_push_job(self._do_poll, p, GLib.PRIORITY_DEFAULT, None)
 
     def start(self):
         if not pylirc:
@@ -31,4 +33,4 @@ class InputProvider:
         p = select.poll()
         p.register(self.socket, select.POLLIN | select.POLLERR | select.POLLHUP | select.POLLNVAL)
 
-        self.poll_source = GLib.idle_add(self._do_poll, p)
+        Gio.io_scheduler_push_job(self._do_poll, p, GLib.PRIORITY_DEFAULT, None)
