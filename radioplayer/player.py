@@ -101,10 +101,10 @@ class Player(GObject.GObject):
                 apply_volume(child.props)
 
     def increment_volume(self):
-        self.update_volume(0.1)
+        self.update_volume(0.05)
 
     def decrement_volume(self):
-        self.update_volume(float(-0.1))
+        self.update_volume(float(-0.05))
 
     def toggle_mute(self):
         if not self._output_location:
