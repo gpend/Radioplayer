@@ -161,6 +161,9 @@ class Player(GObject.GObject):
             self.toggle_play()
         elif key == "Stop":
             self.stop()
+        elif key == "Next":
+            # Too bad we don't have access to the Mute key...
+            self.toggle_mute()
 
     def ping_gnome(self):
         if self._headless:
