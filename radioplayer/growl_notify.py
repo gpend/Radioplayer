@@ -12,7 +12,7 @@ class Notification:
         self.summary = ""
         self.body = ""
         self.icon_name = ""
-        self.id = uuid.uuid4()
+        self.id = uuid.uuid4().urn
         self.noteType = "Now playing"
         self.growl = gntp.notifier.GrowlNotifier(app_name, hostname=config.get("growl", "hostname"),
                                                  password=config.get("growl", "password"),
