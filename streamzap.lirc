@@ -27,6 +27,20 @@ begin
     repeat = 0
     delay = 0
 end
+begin
+    prog = radioplayer
+    button = KEY_NUMERIC_5
+    config = key_5
+    repeat = 0
+    delay = 0
+end
+begin
+    prog = radioplayer
+    button = KEY_NUMERIC_6
+    config = key_6
+    repeat = 0
+    delay = 0
+end
 
 begin
     prog = radioplayer
