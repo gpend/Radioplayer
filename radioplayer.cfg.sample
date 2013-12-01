@@ -8,3 +8,7 @@ password_hash = <md5sum here>
 
 [lirc]
 keymap = /path/to/some/lircrc/like/streamzap.lirc
+
+[growl]
+hostname = foo
+password = bar

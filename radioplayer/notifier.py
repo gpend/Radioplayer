@@ -9,6 +9,11 @@ from gi.repository import GLib, Gio
 
 from radioplayer import player, radios, pylast, imstatus, desktop_notify, lirc_input
 
+try:
+    from radioplayer import growl_notify
+except ImportError:
+    growl_notify = None
+
 class Notifier:
 
     def __init__(self, options, config):
@@ -29,6 +34,8 @@ class Notifier:
         self.current_status = None
         if not self.headless:
             self.notification = desktop_notify.Notification("RadioPlayer")
+        elif growl_notify:
+            self.notification = growl_notify.Notification("RadioPlayer", config)
         else:
             self.notification = None
 
