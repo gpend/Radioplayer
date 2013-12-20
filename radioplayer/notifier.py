@@ -77,7 +77,7 @@ class Notifier:
         if not self.notification:
             return
         self.notification.clear_actions()
-        self.notification.add_action("resume", "Resume playback", self._default_action_cb)
+        self.notification.add_action("resume", "Resume playback", self._resume_playback_cb)
         self.notification.icon_name = "media-playback-stop-symbolic"
         self.notification.show()
 
@@ -86,11 +86,15 @@ class Notifier:
         if not self.notification:
             return
         self.notification.clear_actions()
+        self.notification.add_action("suspend", "Suspend playback", self._suspend_playback_cb)
         self.notification.icon_name = "media-playback-start-symbolic"
         self.notification.show()
 
-    def _default_action_cb(self, notification, action):
+    def _resume_playback_cb(self, notification, action):
         self.player.start()
+
+    def _suspend_playback_cb(self, notification, action):
+        self.player.stop()
 
     def start_player(self):
         if self.interval:
@@ -212,6 +216,7 @@ class Notifier:
         status = u"♫ %s - %s ♫" % (name, title)
         if self.notification:
             self.notification.update(self.station_name, status)
+            self.notification.add_action("suspend", "Suspend playback", self._suspend_playback_cb)
             self.notification.icon_name = "media-playback-start-symbolic"
             self.notification.show()
         GLib.setenv("PA_PROP_MEDIA_ARTIST", name, True)
