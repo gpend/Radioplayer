@@ -216,7 +216,8 @@ class Notifier:
         status = u"♫ %s - %s ♫" % (name, title)
         if self.notification:
             self.notification.update(self.station_name, status)
-            self.notification.add_action("suspend", "Suspend playback", self._suspend_playback_cb)
+            if not self.notification.actions:
+                self.notification.add_action("suspend", "Suspend playback", self._suspend_playback_cb)
             self.notification.icon_name = "media-playback-start-symbolic"
             self.notification.show()
         GLib.setenv("PA_PROP_MEDIA_ARTIST", name, True)
