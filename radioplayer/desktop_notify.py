@@ -36,7 +36,7 @@ class Notification:
         else:
             replaces_id = self.id
         self.hints = {}
-        expire_timeout = 1000
+        expire_timeout = 5000
         args = (self.app_name, replaces_id, self.icon_name, self.summary, self.body,
                 self.actions, self.hints, expire_timeout)
         variant_args = GLib.Variant("(susssasa{sv}i)", args)
