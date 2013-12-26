@@ -169,7 +169,10 @@ class Player(GObject.GObject):
         if self._headless:
             return
         variant_args = GLib.Variant("(su)", (self._app_name, 0))
-        result  = self.proxy.call_sync("GrabMediaPlayerKeys", variant_args, 0, -1, None)
+        try:
+            result  = self.proxy.call_sync("GrabMediaPlayerKeys", variant_args, 0, -1, None)
+        except:
+            pass
 
     def start(self):
         self.pipeline.set_state(Gst.State.PLAYING)
