@@ -95,3 +95,21 @@ class KCSM(Radio):
 
 class Radio3(Radio):
     live_url = 'http://195.10.10.219/rtve/radio3.mp3'
+
+class TripleJ(Radio):
+    live_url = 'http://abc.stream.hostworks.com.au:8002/'
+
+    def now_playing(self):
+        now = int(round(time.time()) / 3e4)
+        url =  "http://www.abc.net.au/triplej/feeds/playout/triplej_sydney_playout.xml?_=%s" % now
+        soup = BeautifulSoup.BeautifulSoup(urllib2.urlopen(url).read())
+        artist = ''
+        album = ''
+        title = ''
+        for item in soup('item'):
+            if item('playing')[0].text == u'now':
+                artist = item('artistname')[0].text
+                album = item('albumname')[0].text
+                title = item('title')[0].text
+                break
+        return (artist, album, title)
