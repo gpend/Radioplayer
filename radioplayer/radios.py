@@ -1,6 +1,7 @@
 import urllib2, BeautifulSoup
 import json
 import time
+import HTMLParser
 
 STATIONS={}
 
@@ -106,10 +107,11 @@ class TripleJ(Radio):
         artist = ''
         album = ''
         title = ''
+        parser = HTMLParser.HTMLParser()
         for item in soup('item'):
             if item('playing')[0].text == u'now':
-                artist = item('artistname')[0].text
-                album = item('albumname')[0].text
-                title = item('title')[0].text
+                artist = parser.unescape(item('artistname')[0].text)
+                album = parser.unescape(item('albumname')[0].text)
+                title = parser.unescape(item('title')[0].text)
                 break
         return (artist, album, title)
