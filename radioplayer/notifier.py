@@ -133,7 +133,7 @@ class Notifier:
         track_nice_name = track_name
         duration = 0
         mbid = ""
-        if self.lastfm:
+        if self.lastfm and artist_name and track_name:
             search_results = self.lastfm.search_for_track(artist_name, track_name)
             page = self._execute_with_pylast(getattr(search_results, "get_next_page"))
             if page and len(page) > 0:
@@ -189,7 +189,7 @@ class Notifier:
             return
         artist_nice_name, album_title, track_nice_name, duration, mbid = self._retrieve_song_infos(current_status)
         now = int(time.time())
-        if self.lastfm:
+        if self.lastfm and '' not in (artist_nice_name, track_nice_name):
             self._execute_with_pylast(getattr(self.lastfm, "scrobble"), artist_nice_name, track_nice_name,
                                       now, album_title, album_artist=None, track_number=None, duration=duration,
                                       stream_id=None, context=None, mbid=mbid)
