@@ -39,7 +39,10 @@ class FIP(Radio):
         json_data = json.loads(data)
         self._cache_expires = int(json_data["validite"])
         soup = BeautifulSoup.BeautifulSoup(json_data["html"])
-        div =  soup.findAll("div", attrs={"class":"direct-item direct-distance-0 current"})[0]
+        try:
+            div =  soup.findAll("div", attrs={"class":"direct-item direct-distance-0 current"})[0]
+        except IndexError:
+            return ("", "", "")
         artist = div.findAll("div", attrs={"class": "artiste"})[0].text
         album = div.findAll("div", attrs={"class": "album"})[0].text
         title = div.findAll("div", attrs={"class": "titre"})[0].text
