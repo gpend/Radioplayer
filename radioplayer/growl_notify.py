@@ -15,10 +15,14 @@ class Notification:
         self.icon_name = ""
         self.id = uuid.uuid4().urn
         self.noteType = "Now playing"
-        self.growl = gntp.notifier.GrowlNotifier(app_name, hostname=config.get("growl", "hostname"),
+        hostname = config.get("growl", "hostname")
+        self.growl = gntp.notifier.GrowlNotifier(app_name, hostname=hostname,
                                                  password=config.get("growl", "password"),
                                                  notifications=[self.noteType,])
-        self.growl.register()
+        try:
+            self.growl.register()
+        except Exception, exc:
+            print "Failed to connect to Growl service at %s: %s" % (hostname, str(exc))
 
     def show(self):
         self.growl.notify(noteType=self.noteType, title=self.summary, description=self.body,

@@ -35,7 +35,10 @@ class Notifier:
         if not self.headless:
             self.notification = desktop_notify.Notification("RadioPlayer")
         elif growl_notify:
-            self.notification = growl_notify.Notification("RadioPlayer", config)
+            try:
+                self.notification = growl_notify.Notification("RadioPlayer", config)
+            except Exception, exc:
+                self.notification = None
         else:
             self.notification = None
 
