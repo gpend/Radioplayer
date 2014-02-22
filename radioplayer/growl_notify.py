@@ -9,6 +9,7 @@ class Notification:
     def __init__(self, app_name, config, closed_cb=None):
         self.app_name = app_name
         self.config = config
+        self.actions = []
         self.summary = ""
         self.body = ""
         self.icon_name = ""
