@@ -23,6 +23,7 @@ class Notification:
             self.growl.register()
         except Exception, exc:
             print "Failed to connect to Growl service at %s: %s" % (hostname, str(exc))
+            raise
 
     def show(self):
         self.growl.notify(noteType=self.noteType, title=self.summary, description=self.body,
