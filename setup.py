@@ -5,7 +5,7 @@ from radioplayer import version
 
 data_files = []
 
-readme = open('README').read()
+readme = open('README.rst').read()
 
 setup(name="radioplayer",
       version=version,
