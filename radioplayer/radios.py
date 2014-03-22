@@ -86,15 +86,10 @@ class KCSM(Radio):
     def now_playing(self):
         url = 'http://kcsm.org/playlist'
         soup = BeautifulSoup.BeautifulSoup(urllib2.urlopen(url).read())
-        tr = soup('table', {'class': 'style54'})[1].tr('td')
-
-        time = tr[1].div.string
-        artist = tr[3].string.title()
-        title = tr[4].span.string.title()
-        if tr[5].span.string:
-            album = tr[5].span.string.title()
-        else:
-            album = ''
+        rows = soup('table', {'class': 'listbackground'})[0].findAll('tr')
+        artist = rows[0].find('a',{'class':'artist_title'}).text
+        title = rows[0].findAll('td')[-1].text
+        album = rows[1].find('a').text
         return (artist, album, title)
 
 class Radio3(Radio):
