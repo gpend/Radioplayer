@@ -158,7 +158,7 @@ class Player(GObject.GObject):
             state = self.pipeline.get_state(0)[1]
             if state == Gst.State.PLAYING and percent < 100:
                 self.pipeline.set_state(Gst.State.PAUSED)
-            elif percent == 100:
+            elif state == Gst.State.PAUSED and percent == 100:
                 self.pipeline.set_state(Gst.State.PLAYING)
 
     def _key_pressed(self, app, key):
