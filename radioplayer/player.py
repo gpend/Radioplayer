@@ -153,6 +153,13 @@ class Player(GObject.GObject):
             elif old_state == Gst.State.PLAYING and new_state == Gst.State.PAUSED:
                 self.emit("suspended")
                 self.pipeline.set_state(Gst.State.NULL)
+        elif t == Gst.MessageType.BUFFERING:
+            percent = message.parse_buffering()
+            state = self.pipeline.get_state(0)[1]
+            if state == Gst.State.PLAYING and percent < 100:
+                self.pipeline.set_state(Gst.State.PAUSED)
+            elif percent == 100:
+                self.pipeline.set_state(Gst.State.PLAYING)
 
     def _key_pressed(self, app, key):
         if app != self._app_name:
