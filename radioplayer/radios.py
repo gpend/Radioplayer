@@ -93,7 +93,7 @@ class KCSM(Radio):
         return (artist, album, title)
 
 class Radio3(Radio):
-    live_url = 'http://195.10.10.219/rtve/radio3.mp3'
+    live_url = 'http://195.10.10.206/rtve/radio3.mp3'
 
 class TripleJ(Radio):
     live_url = 'http://abc.stream.hostworks.com.au:8002/'
