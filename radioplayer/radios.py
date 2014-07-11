@@ -96,7 +96,7 @@ class Radio3(Radio):
     live_url = 'http://195.10.10.206/rtve/radio3.mp3'
 
 class TripleJ(Radio):
-    live_url = 'http://abc.stream.hostworks.com.au:8002/'
+    live_url = 'http://shoutmedia.abc.net.au:10426'
 
     def now_playing(self):
         now = int(round(time.time()) / 3e4)
