@@ -34,18 +34,14 @@ class FIP(Radio):
 
     def now_playing(self):
         now = int(round(time.time()))
-        url =  "http://fipradio.fr/sites/default/files/direct-large.json?_=%s" % now
+        url =  "http://fipradio.fr/sites/default/files/import_si/si_titre_antenne/FIP_player_current.json?_=%s" % now
         data = urllib2.urlopen(url).read()
         json_data = json.loads(data)
-        self._cache_expires = int(json_data["validite"])
-        soup = BeautifulSoup.BeautifulSoup(json_data["html"])
-        try:
-            div =  soup.findAll("div", attrs={"class":"direct-item direct-distance-0 current"})[0]
-        except IndexError:
-            return ("", "", "")
-        artist = div.findAll("div", attrs={"class": "artiste"})[0].text
-        album = div.findAll("div", attrs={"class": "album"})[0].text
-        title = div.findAll("div", attrs={"class": "titre"})[0].text
+        song = json_data['current']['song']
+        self._cache_expires = song['endTime']
+        artist = song['interpreteMorceau'].title()
+        album = song['titreAlbum'].title()
+        title = song['titre'].title()
         return (artist, album, title)
 
 class FranceInter(Radio):
