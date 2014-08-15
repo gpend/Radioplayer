@@ -77,7 +77,7 @@ class LeMouv(Radio):
             return (artist, "", title)
 
 class KCSM(Radio):
-    live_url = "http://sc1.abacast.com:8240"
+    live_url = "http://ice7.securenetsystems.net/KCSM2"
 
     def now_playing(self):
         url = 'http://kcsm.org/playlist'
