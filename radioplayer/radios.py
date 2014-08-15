@@ -66,15 +66,12 @@ class LeMouv(Radio):
         self._cache_expires = int(json_data["validite"])
         if (self._cache_expires - now) > 400:
             self._cache_expires = now + 300
-        soup = BeautifulSoup.BeautifulSoup(json_data["html"])
-        try:
-            span =  soup.findAll("span", attrs={"class":"direct-antenne"})[0]
-            artist = span.findAll("span", attrs={"class": "artiste"})[0].text
-            title = span.findAll("span", attrs={"class": "titre"})[0].text
-        except:
-            return ("", "", "")
-        else:
-            return (artist, "", title)
+
+        song = json_data['rf_titre_antenne']
+        artist = song['interprete'].title()
+        album = ""
+        title = song['titre'].title()
+        return (artist, album, title)
 
 class KCSM(Radio):
     live_url = "http://ice7.securenetsystems.net/KCSM2"
