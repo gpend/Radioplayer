@@ -3,6 +3,14 @@ import json
 import time
 import HTMLParser
 
+import gi
+try:
+    gi.require_version("TotemPlParser", "1.0")
+except:
+    TotemPlParser = None
+else:
+    from gi.repository import TotemPlParser
+
 STATIONS={}
 
 class MetaRadio(type):
@@ -14,6 +22,7 @@ class MetaRadio(type):
 class Radio(object):
     __metaclass__ = MetaRadio
     advising_cache_time = False
+    stream_url = ''
 
     def next_update_timestamp(self):
         return None
@@ -21,8 +30,27 @@ class Radio(object):
     def now_playing(self):
         return ("", "", "")
 
+
+    def entry_parsed_cb(self, parser, entry, details):
+        self.stream_url = entry
+
+    @property
+    def live_url(self):
+        if self.stream_url:
+            return self.stream_url
+
+        if not TotemPlParser:
+            return ""
+
+        parser = TotemPlParser.Parser()
+        signal_handler  = parser.connect("entry-parsed", self.entry_parsed_cb)
+        parser.parse(self.playlist_url, False)
+        parser.disconnect(signal_handler)
+
+        return self.stream_url
+
 class FIP(Radio):
-    live_url = "http://mp3.live.tv-radio.com/fip/all/fiphautdebit.mp3"
+    stream_url = "http://mp3.live.tv-radio.com/fip/all/fiphautdebit.mp3"
     advising_cache_time = True
 
     def __init__(self):
@@ -45,10 +73,10 @@ class FIP(Radio):
         return (artist, album, title)
 
 class FranceInter(Radio):
-    live_url = "http://mp3.live.tv-radio.com/franceinter/all/franceinterhautdebit.mp3"
+    stream_url = "http://mp3.live.tv-radio.com/franceinter/all/franceinterhautdebit.mp3"
 
 class LeMouv(Radio):
-    live_url = "http://mp3.live.tv-radio.com/lemouv/all/lemouvhautdebit.mp3"
+    stream_url = "http://mp3.live.tv-radio.com/lemouv/all/lemouvhautdebit.mp3"
     advising_cache_time = True
 
     def __init__(self):
@@ -74,7 +102,7 @@ class LeMouv(Radio):
         return (artist, album, title)
 
 class KCSM(Radio):
-    live_url = "http://ice7.securenetsystems.net/KCSM2"
+    playlist_url = 'http://kcsm.org/KCSM-iTunes-SNS.pls'
 
     def now_playing(self):
         url = 'http://kcsm.org/playlist'
@@ -86,10 +114,10 @@ class KCSM(Radio):
         return (artist, album, title)
 
 class Radio3(Radio):
-    live_url = 'http://195.10.10.224/rtve/radio3.mp3'
+    playlist_url = 'http://radio3.rtve.stream.flumotion.com/rtve/radio3.mp3.m3u'
 
 class TripleJ(Radio):
-    live_url = 'http://shoutmedia.abc.net.au:10426'
+    playlist_url = 'http://www.abc.net.au/res/streaming/audio/mp3/triplej.pls'
 
     def now_playing(self):
         now = int(round(time.time()) / 3e4)

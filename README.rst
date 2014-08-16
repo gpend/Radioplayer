@@ -11,6 +11,7 @@ Dependencies:
 - gst-plugins-good
 - optional: python-lirc
 - optional: python-gntp
+- optional: totem-pl-parser
 
 Features:
 
