@@ -7,7 +7,7 @@ import httplib
 import socket
 from gi.repository import GLib, Gio
 
-from radioplayer import player, radios, pylast, imstatus, desktop_notify, lirc_input
+from radioplayer import player, radios, pylast, imstatus, desktop_notify, lirc_input, denon
 
 try:
     from radioplayer import growl_notify
@@ -52,6 +52,8 @@ class Notifier:
             self.im_manager = imstatus.ImStatusManager(self.headless)
             self.im_manager.save_status()
 
+        self.denon_remote = denon.DenonRemote(config)
+
     def handle_input(self, code):
         if code.startswith("key_"):
             idx = int(code[4:])
@@ -72,6 +74,10 @@ class Notifier:
             self.player.decrement_volume()
         elif code == "mute":
             self.player.toggle_mute()
+        elif code == "power":
+            self.player.toggle_play()
+            if self.denon_remote.enabled:
+               self.denon_remote.toggle_power()
         else:
             print "Unhandled input: %s" % code
 

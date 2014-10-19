@@ -12,3 +12,6 @@ keymap = /path/to/some/lircrc/like/streamzap.lirc
 [growl]
 hostname = foo
 password = bar
+
+[denon]
+address = 192.168.1.100
