@@ -1,11 +1,15 @@
 
+import ConfigParser
 import telnetlib
 import time
 
 class DenonRemote:
 
     def __init__(self, config):
-        self.address = config.get("denon", "address")
+        try:
+            self.address = config.get("denon", "address")
+        except ConfigParser.NoSectionError:
+            self.address = None
 
     @property
     def enabled(self):
