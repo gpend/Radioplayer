@@ -29,6 +29,7 @@ class Notifier:
 
         self.timeout_id = 0
         self.suspended = False
+        self.remote_enabled = True
 
         self.station = radios.STATIONS[self.station_name]()
         self.current_status = None
@@ -55,6 +56,9 @@ class Notifier:
         self.denon_remote = denon.DenonRemote(config)
 
     def handle_input(self, code):
+        if not self.remote_enabled and code != "red":
+            return
+
         if code.startswith("key_"):
             idx = int(code[4:])
             stations = radios.STATIONS.keys()
@@ -83,6 +87,12 @@ class Notifier:
                    self.player.stop()
             else:
                 self.player.toggle_play()
+        elif code == "red":
+            if self.remote_enabled:
+                self.player.stop()
+            else:
+                self.player.start()
+            self.remote_enabled = not self.remote_enabled
         else:
             print "Unhandled input: %s" % code
 
