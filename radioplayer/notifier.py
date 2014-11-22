@@ -75,9 +75,14 @@ class Notifier:
         elif code == "mute":
             self.player.toggle_mute()
         elif code == "power":
-            self.player.toggle_play()
             if self.denon_remote.enabled:
-               self.denon_remote.toggle_power()
+               powered = self.denon_remote.toggle_power()
+               if powered:
+                   self.player.start()
+               else:
+                   self.player.stop()
+            else:
+                self.player.toggle_play()
         else:
             print "Unhandled input: %s" % code
 
