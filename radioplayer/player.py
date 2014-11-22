@@ -50,16 +50,7 @@ class Player(GObject.GObject):
         if not self._output_location:
             self.pipeline = Gst.ElementFactory.make(PLAYBIN, "playbin")
             self.pipeline.props.uri = self._url
-            self.sinkbin = Gst.ElementFactory.make("bin", "audiobin")
-            level = Gst.ElementFactory.make("level", "audiolevel")
-            level.props.interval = 5000000000
-            sink = Gst.ElementFactory.make(self._audiosink, "audiosink")
-            self.sinkbin.add(level)
-            self.sinkbin.add(sink)
-            level.link(sink)
-            sinkpad = level.get_static_pad("sink")
-            self.sinkbin.add_pad(Gst.GhostPad.new("sink", sinkpad))
-            self.pipeline.props.audio_sink = self.sinkbin
+            self.pipeline.props.audio_sink = Gst.ElementFactory.make(self._audiosink, "audiosink")
         else:
             self.pipeline = Gst.parse_launch("souphttpsrc name=src location=%s "
                                              "! tee name=t queue t. ! %s "
@@ -83,22 +74,9 @@ class Player(GObject.GObject):
         self.start()
 
     def update_volume(self, delta):
-        def apply_volume(props):
-            value = props.volume + delta
-            # Clamp between 0 and 1.
-            props.volume = max(min(value, 1.), 0.)
-
-        if not self._output_location:
-            apply_volume(self.pipeline.props)
-        else:
-            sink = self.sinkbin.get_child_by_name("audiosink")
-            if not sink:
-                return
-            try:
-                apply_volume(sink.props)
-            except:
-                child = sink.get_child_by_index(0)
-                apply_volume(child.props)
+        value = self.pipeline.props.volume + delta
+        # Clamp between 0 and 1.
+        self.pipeline.props.volume = max(min(value, 1.), 0.)
 
     def increment_volume(self):
         self.update_volume(0.05)
@@ -107,17 +85,7 @@ class Player(GObject.GObject):
         self.update_volume(float(-0.05))
 
     def toggle_mute(self):
-        if not self._output_location:
-            self.pipeline.props.mute = not self.pipeline.props.mute
-        else:
-            sink = self.sinkbin.get_child_by_name("audiosink")
-            if not sink:
-                return
-            try:
-                sink.props.mute = not sink.props.mute
-            except:
-                child = sink.get_child_by_index(0)
-                child.props.mute = not sink.props.mute
+        self.pipeline.props.mute = not self.pipeline.props.mute
 
     def do_suspended(self):
         pass
@@ -137,16 +105,7 @@ class Player(GObject.GObject):
             self.pipeline = None
             self._configure_pipeline()
             self.start()
-        elif t == Gst.MessageType.ELEMENT:
-            structure = message.get_structure()
-            if structure.get_name() == "level" and structure.get_value("peak")[0] < -30:
-                # for value_type in ("peak", "rms", "decay"):
-                #     values = [ pow(10, val / 20) for val in structure.get_value(value_type)]
-                #     print "%6s -> %r" % (value_type, values)
-                    print "Silence detected, restarting playback"
-                    self.stop(notify=False)
-                    self.start()
-        elif t == Gst.MessageType.STATE_CHANGED and message.src.name == PLAYBIN and self._notify:
+        elif t == Gst.MessageType.STATE_CHANGED and message.src.name == PLAYBIN:
             old_state, new_state, pending_state = message.parse_state_changed()
             if new_state == Gst.State.PLAYING:
                 self.emit("resumed")
