@@ -216,7 +216,7 @@ class Notifier:
         if self.notification:
             self.notification.close()
         if self.player:
-            self.player.stop(notify=False)
+            self.player.stop()
         if not self.disable_imstatus:
             self.im_manager.restore_status()
         self.loop.quit()

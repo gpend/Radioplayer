@@ -21,12 +21,10 @@ class Player(GObject.GObject):
         super(Player, self).__init__()
         GObject.threads_init()
         self._app_name = "radioplayer"
-        self._notify = False
         self._url = url
         self._audiosink = audiosink
         self._output_location = output_location
         self._headless = headless
-
         Gst.init([])
         self._configure_pipeline()
 
@@ -144,7 +142,6 @@ class Player(GObject.GObject):
         self.pipeline.set_state(Gst.State.PLAYING)
 
     def stop(self, *args, **kwargs):
-        self._notify = kwargs.get("notify", True)
         # FIXME: Setting to NULL directly we don't get the state-change messages on the bus.
         # So set to PAUSED and later on to NULL if we come from PLAYING in the message handler.
         self.pipeline.set_state(Gst.State.PAUSED)
