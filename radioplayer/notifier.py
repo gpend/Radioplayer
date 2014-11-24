@@ -5,6 +5,7 @@ import time
 import urllib2
 import httplib
 import socket
+import threading
 from gi.repository import GLib, Gio
 
 from radioplayer import player, radios, pylast, imstatus, desktop_notify, lirc_input, denon
@@ -134,22 +135,31 @@ class Notifier:
         if self.disable_scrobble:
             return
         if not self.interval:
-            self.lastfm = self.librefm = None
             return
 
-        lastfm_username = self.config.get("scrobbler-lastfm", "user")
-        lastfm_pw_hash = self.config.get("scrobbler-lastfm", "password_hash")
-        if lastfm_username and lastfm_pw_hash:
-            self.lastfm = pylast.get_lastfm_network(api_key="623bbd684658a8eaaa4066037d3c1531",
-                                                    api_secret="547e71d1582dfb73f6857444992fa629",
-                                                    username=lastfm_username,
-                                                    password_hash=lastfm_pw_hash)
+	self.lastfm = self.librefm = None
 
-        librefm_username = self.config.get("scrobbler-librefm", "user")
-        librefm_pw_hash = self.config.get("scrobbler-librefm", "password_hash")
-        if librefm_username and librefm_pw_hash:
-            self.librefm = pylast.get_librefm_network(username=librefm_username,
-                                                      password_hash=librefm_pw_hash)
+        def do_login():
+	    lastfm_username = self.config.get("scrobbler-lastfm", "user")
+	    lastfm_pw_hash = self.config.get("scrobbler-lastfm", "password_hash")
+	    if lastfm_username and lastfm_pw_hash:
+		try:
+		    self.lastfm = pylast.get_lastfm_network(api_key="623bbd684658a8eaaa4066037d3c1531",
+							    api_secret="547e71d1582dfb73f6857444992fa629",
+							    username=lastfm_username,
+							    password_hash=lastfm_pw_hash)
+		except:
+		    self.lastfm = None
+		    # TODO: locally cache scrobbles.
+
+	    librefm_username = self.config.get("scrobbler-librefm", "user")
+	    librefm_pw_hash = self.config.get("scrobbler-librefm", "password_hash")
+	    if librefm_username and librefm_pw_hash:
+		self.librefm = pylast.get_librefm_network(username=librefm_username,
+							  password_hash=librefm_pw_hash)
+
+	thread = threading.Thread(target=do_login)
+	thread.start()
 
     def _retrieve_song_infos(self, current_status):
         artist_name, album_title, track_name = current_status
