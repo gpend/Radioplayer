@@ -25,6 +25,7 @@ class Player(GObject.GObject):
         self._audiosink = audiosink
         self._output_location = output_location
         self._headless = headless
+        self._buffering = False
         Gst.init([])
         self._configure_pipeline()
 
@@ -49,6 +50,8 @@ class Player(GObject.GObject):
             self.pipeline = Gst.ElementFactory.make(PLAYBIN, "playbin")
             self.pipeline.props.uri = self._url
             self.pipeline.props.audio_sink = Gst.ElementFactory.make(self._audiosink, "audiosink")
+            # Enable buffering support.
+            self.pipeline.props.flags |= 0x00000100
         else:
             self.pipeline = Gst.parse_launch("souphttpsrc name=src location=%s "
                                              "! tee name=t queue t. ! %s "
@@ -107,12 +110,13 @@ class Player(GObject.GObject):
             old_state, new_state, pending_state = message.parse_state_changed()
             if new_state == Gst.State.PLAYING:
                 self.emit("resumed")
-            elif old_state == Gst.State.PLAYING and new_state == Gst.State.PAUSED:
+            elif old_state == Gst.State.PLAYING and new_state == Gst.State.PAUSED and not self._buffering:
                 self.emit("suspended")
                 self.pipeline.set_state(Gst.State.NULL)
         elif t == Gst.MessageType.BUFFERING:
             percent = message.parse_buffering()
             state = self.pipeline.get_state(0)[1]
+            self._buffering = percent < 100
             if state == Gst.State.PLAYING and percent < 100:
                 self.pipeline.set_state(Gst.State.PAUSED)
             elif state == Gst.State.PAUSED and percent == 100:
