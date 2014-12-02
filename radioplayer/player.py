@@ -115,7 +115,7 @@ class Player(GObject.GObject):
                 self.pipeline.set_state(Gst.State.NULL)
         elif t == Gst.MessageType.BUFFERING:
             percent = message.parse_buffering()
-            state = self.pipeline.get_state(0)[1]
+            result, state, pending = self.pipeline.get_state(0)
             self._buffering = percent < 100
             if state == Gst.State.PLAYING and percent < 100:
                 self.pipeline.set_state(Gst.State.PAUSED)
