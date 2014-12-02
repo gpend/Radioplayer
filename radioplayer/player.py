@@ -112,7 +112,6 @@ class Player(GObject.GObject):
                 self.emit("resumed")
             elif old_state == Gst.State.PLAYING and new_state == Gst.State.PAUSED and not self._buffering:
                 self.emit("suspended")
-                self.pipeline.set_state(Gst.State.NULL)
         elif t == Gst.MessageType.BUFFERING:
             percent = message.parse_buffering()
             result, state, pending = self.pipeline.get_state(0)
