@@ -8,7 +8,7 @@ import socket
 import threading
 from gi.repository import GLib, Gio
 
-from radioplayer import player, radios, pylast, imstatus, desktop_notify, lirc_input, denon
+from radioplayer import player, radios, pylast, desktop_notify, lirc_input, denon
 
 try:
     from radioplayer import growl_notify
@@ -24,7 +24,6 @@ class Notifier:
         self.audiosink = options.audiosink
         self.output_path = options.output
         self.disable_scrobble = options.noscrobble
-        self.disable_imstatus = options.noimstatus
         self.headless = options.headless
         self.config = config
 
@@ -49,10 +48,6 @@ class Notifier:
 
         self.input_provider = lirc_input.InputProvider(config, self)
         self.input_provider.start()
-
-        if not self.disable_imstatus:
-            self.im_manager = imstatus.ImStatusManager(self.headless)
-            self.im_manager.save_status()
 
         self.denon_remote = denon.DenonRemote(config)
 
@@ -242,8 +237,6 @@ class Notifier:
             self.notification.close()
         if self.player:
             self.player.stop()
-        if not self.disable_imstatus:
-            self.im_manager.restore_status()
         self.loop.quit()
 
     def status(self, name, album, title):
@@ -283,8 +276,6 @@ class Notifier:
 
             message = self.status(*current)
             print message
-            if not self.disable_imstatus:
-                self.im_manager.set_status_async(message)
             if self.current_status:
                 self.scrobble_song(self.current_status)
             self.scrobble_update_now_playing(current)
