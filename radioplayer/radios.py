@@ -117,7 +117,7 @@ class KCSM(Radio):
         return (artist, album, title)
 
 class Radio3(Radio):
-    playlist_url = 'http://radio3.rtve.stream.flumotion.com/rtve/radio3.mp3.m3u'
+    playlist_url = 'http://radiolive.rtve.es/radio3.m3u'
 
 class TripleJ(Radio):
     playlist_url = 'http://www.abc.net.au/res/streaming/audio/mp3/triplej.pls'
