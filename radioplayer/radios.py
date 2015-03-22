@@ -72,6 +72,9 @@ class FIP(Radio):
         title = song['titre'].title()
         return (artist, album, title)
 
+class FIPNantes(FIP):
+    stream_url = "http://mp3lg4.tdf-cdn.com/6834/fipnantes-hd.mp3"
+
 class FranceInter(Radio):
     stream_url = "http://mp3.live.tv-radio.com/franceinter/all/franceinterhautdebit.mp3"
 
