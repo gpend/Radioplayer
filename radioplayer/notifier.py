@@ -59,7 +59,10 @@ class Notifier:
             idx = int(code[4:])
             stations = radios.STATIONS.keys()
             stations.sort()
-            self.station_name = stations[idx-1]
+            try:
+                self.station_name = stations[idx-1]
+            except IndexError:
+                return
             print self.station_name
             self.station = radios.STATIONS[self.station_name]()
             self.player.set_url(self.station.live_url)
