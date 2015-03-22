@@ -64,6 +64,8 @@ class Player(GObject.GObject):
         bus.connect('message', self._on_gst_message)
 
     def set_url(self, url):
+        if not url:
+            return
         self._url = url
         self.pipeline.set_state(Gst.State.NULL)
         if not self._output_location:
