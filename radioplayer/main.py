@@ -35,7 +35,9 @@ def main(args=None):
     if options.list_stations:
         from radioplayer.radios import STATIONS
         print "Supported radio stations:"
-        for name in STATIONS.keys():
+        stations = STATIONS.keys()
+        stations.sort()
+        for name in stations:
             print "- %s" % name
         return 0
 
