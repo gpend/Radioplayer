@@ -2,6 +2,7 @@
 import ConfigParser
 import telnetlib
 import time
+import socket
 
 class DenonRemote:
 
