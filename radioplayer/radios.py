@@ -50,7 +50,7 @@ class Radio(object):
         return self.stream_url
 
 class FIP(Radio):
-    stream_url = "http://mp3.live.tv-radio.com/fip/all/fiphautdebit.mp3"
+    stream_url = "http://audio.scdn.arkena.com/11016/fip-midfi128.mp3"
     advising_cache_time = True
 
     def __init__(self):
