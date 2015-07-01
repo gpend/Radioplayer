@@ -73,13 +73,14 @@ class FIP(Radio):
         return (artist, album, title)
 
 class FIPNantes(FIP):
-    stream_url = "http://mp3lg4.tdf-cdn.com/6834/fipnantes-hd.mp3"
+    stream_url = "http://audio.scdn.arkena.com/11016/fip-midfi128.mp3"
 
 class FranceInter(Radio):
-    stream_url = "http://mp3.live.tv-radio.com/franceinter/all/franceinterhautdebit.mp3"
+    stream_url = "http://audio.scdn.arkena.com/11008/franceinter-midfi128.mp3"
+
 
 class LeMouv(Radio):
-    stream_url = "http://mp3.live.tv-radio.com/lemouv/all/lemouvhautdebit.mp3"
+    stream_url = "http://audio.scdn.arkena.com/11014/mouv-midfi128.mp3"
     advising_cache_time = True
 
     def __init__(self):
