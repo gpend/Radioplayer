@@ -26,6 +26,8 @@ class Notification:
             raise
 
     def show(self):
+        if not self.body:
+            return
         self.growl.notify(noteType=self.noteType, title=self.summary, description=self.body,
                           identifier=self.id, sticky=True)
 
