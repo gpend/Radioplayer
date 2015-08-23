@@ -1,7 +1,12 @@
 
 A simple radio player implemented in Python.
 
-Currently supports FIP, FranceInter, KCSM, LeMouv and TripleJ.
+Currently supports FIP, FranceInter, KCSM, LeMouv and TripleJ. To get
+the full list:
+
+  ::
+  
+    radioplayer -l
 
 Dependencies:
 
@@ -9,9 +14,12 @@ Dependencies:
 - gstreamer
 - gst-plugins-base
 - gst-plugins-good
-- optional: python-lirc
-- optional: python-gntp
-- optional: totem-pl-parser
+
+Optional dependencies:
+
+- python-lirc
+- python-gntp
+- totem-pl-parser
 
 Features:
 
@@ -20,8 +28,8 @@ Features:
 - scrobbling to lastfm and/or librefm
 - optionally dump the stream to a local file
 - multimedia keys support (stop, playpause)
-- IM message status update (pidgin, gajim, telepathy)
 - headless mode, when dbus and/or X11 is not available
+- limited support for Denon AVR amps, power off/on from remote control
 
 To install:
 
