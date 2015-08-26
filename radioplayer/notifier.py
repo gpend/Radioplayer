@@ -278,7 +278,7 @@ class Notifier:
                 self.timeout_id = GLib.timeout_add_seconds(int(delta), self.update)
 
             message = self.status(*current)
-            print message
+            print message.encode("utf-8")
             if self.current_status:
                 self.scrobble_song(self.current_status)
             self.scrobble_update_now_playing(current)
