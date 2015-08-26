@@ -78,6 +78,9 @@ class FIPNantes(FIP):
 class FranceInter(Radio):
     stream_url = "http://audio.scdn.arkena.com/11008/franceinter-midfi128.mp3"
 
+class FranceMusique(Radio):
+    stream_url = "http://audio.scdn.arkena.com/11012/francemusique-midfi128.mp3"
+
 
 class LeMouv(Radio):
     stream_url = "http://audio.scdn.arkena.com/11014/mouv-midfi128.mp3"
