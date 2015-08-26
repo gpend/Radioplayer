@@ -35,7 +35,7 @@ class Notification:
             replaces_id = 0
         else:
             replaces_id = self.id
-        self.hints = {}
+        self.hints = {"transient": GLib.Variant("b", True)}
         expire_timeout = 5000
         args = (self.app_name, replaces_id, self.icon_name, self.summary, self.body,
                 self.actions, self.hints, expire_timeout)
