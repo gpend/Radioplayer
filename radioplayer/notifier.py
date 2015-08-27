@@ -167,7 +167,8 @@ class Notifier:
         mbid = ""
         if self.lastfm and artist_name and track_name:
             search_results = self.lastfm.search_for_track(artist_name, track_name)
-            page = self._execute_with_pylast(getattr(search_results, "get_next_page"))
+            #page = self._execute_with_pylast(getattr(search_results, "get_next_page"))
+            page = []
             if page and len(page) > 0:
                 track = page[0]
                 if not album_title:
